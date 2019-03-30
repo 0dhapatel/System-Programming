@@ -4,7 +4,7 @@
 
 typedef struct huffnode
 {
-    char str; // word
+    char ch; // letter
     unsigned int freq; // binary frequency
     huffnode* left, *right; // left and right child
 }huff;
