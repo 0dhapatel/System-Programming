@@ -6,7 +6,7 @@ typedef struct huffnode
 {
     char ch; // letter
     unsigned int freq; // binary frequency
-    huffnode* left, *right; // left and right child
+    huffnode struct *left, *right; // left and right child
 }huff;
 
 // assuming frequency r in order
