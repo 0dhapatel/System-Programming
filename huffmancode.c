@@ -16,8 +16,8 @@ typedef struct huffnode
 // A Min Heap:  Collection of min heap (or Hufmman tree) nodes 
 typedef struct heapnode
 {
-  // Current size of min heap 
-  unsigned size;
+  // Current height of min heap 
+  unsigned height;
   // capacity of min heap 
   unsigned cap;
   // Attay of minnode node pointers 
@@ -38,8 +38,8 @@ huff *node (char *word, unsigned freq)
 heapnode *creminheap (unsigned cap)
 {
   heapnode *minnode = (heapnode *) malloc (sizeof (heapnode));
-  // current size is 0 
-  minnode->size = 0;
+  // current height is 0 
+  minnode->height = 0;
   minnode->cap = cap;
   minnode->harr = (huff **) malloc (minnode->cap * sizeof (huff *));
   return minnode;
@@ -51,12 +51,12 @@ void order (heapnode *minnode, int ptr)
   int smallest = ptr;
   int left = 2 * ptr + 1;
   int right = 2 * ptr + 2;
-  if (left < minnode->size
+  if (left < minnode->height
       && minnode->harr[left]->freq < minnode->harr[smallest]->freq)
     {
       smallest = left;
     }
-  if (right < minnode->size
+  if (right < minnode->height
       && minnode->harr[right]->freq < minnode->harr[smallest]->freq)
     {
       smallest = right;
@@ -74,8 +74,8 @@ void order (heapnode *minnode, int ptr)
 huff *freemin (heapnode *minnode)
 {
   huff *temp = minnode->harr[0];
-  minnode->harr[0] = minnode->harr[minnode->size - 1];
-  --minnode->size;
+  minnode->harr[0] = minnode->harr[minnode->height - 1];
+  --minnode->height;
   order (minnode, 0);
   return temp;
 }
@@ -83,8 +83,8 @@ huff *freemin (heapnode *minnode)
 // A  function to insert a new node to Min Heap 
 void insnode (heapnode *minnode, huff *minnodeNode)
 {
-  ++minnode->size;
-  int i = minnode->size - 1;
+  ++minnode->height;
+  int i = minnode->height - 1;
   while (i && minnodeNode->freq < minnode->harr[(i - 1) / 2]->freq)
     {
       minnode->harr[i] = minnode->harr[(i - 1) / 2];
@@ -96,13 +96,13 @@ void insnode (heapnode *minnode, huff *minnodeNode)
 // A standard funvtion to build min heap 
 void buinode (heapnode *minnode)
 {
-  int n = minnode->size - 1;
+  int n = minnode->height - 1;
   int i;
   for (i = (n - 1) / 2; i >= 0; --i)
     order (minnode, i);
 }
 
-// A  function to print an array of size n 
+// A  function to print an array of height n 
 void printstr (int str[], int n)
 {
   int i;
@@ -112,27 +112,27 @@ void printstr (int str[], int n)
   printf ("\n");
 }
 
-// Creates a min heap of capacity equal to size and inserts all character of word[] in min heap. Initially size of min heap is equal to cap 
-heapnode * makenode (char *word[], int freq[], int size)
+// Creates a min heap of capacity equal to height and inserts all character of word[] in min heap. Initially height of min heap is equal to cap 
+heapnode * makenode (char *word[], int freq[], int height)
 {
   int i;
-  heapnode *minnode = creminheap (size);
-  for (i = 0; i < size; ++i){
+  heapnode *minnode = creminheap (height);
+  for (i = 0; i < height; ++i){
     minnode->harr[i] = node (word[i], freq[i]);
   }
-  minnode->size = size;
+  minnode->height = height;
   buinode (minnode);
   return minnode;
 }
 
 // Function that builds Huffman tree 
-huff * maketree (char *word[], int freq[], int size)
+huff * maketree (char *word[], int freq[], int height)
 {
   huff *left, *right, *top;
-  // Create a min heap of capacity equal to size. Initially, there are modes equal to size. 
-  heapnode *minnode = makenode (word, freq, size);
-  // Iterate while size of heap doesn't become 1 
-  while (!(minnode->size == 1))
+  // Create a min heap of capacity equal to height. Initially, there are modes equal to height. 
+  heapnode *minnode = makenode (word, freq, height);
+  // Iterate while height of heap doesn't become 1 
+  while (!(minnode->height == 1))
     {
       // Extract the two minimum freq items from min heap 
       left = freemin (minnode);
@@ -175,10 +175,9 @@ int main ()
 {
   char *str[] = { "'ade'", "'b'", "'c'", "'d'", "'e'", "'f'" };
   int freq[] = { 45, 9, 13, 13, 16, 5 };
-  int size = sizeof (str) / sizeof (str[0]);
-  printf("%d\n\n",size);
-  //Making huffman tree
-   huff *root = maketree (str, freq, size);
+  int height = sizeof (str) / sizeof (str[0]);
+  printf("%d\n\n",height);
+   huff *root = maketree (str, freq, height);
   // Prints out Huffman codes using the Huffman tree built above 
   int words[100], pt = 0; // used 100 randomly
   printc (root, words, pt);
