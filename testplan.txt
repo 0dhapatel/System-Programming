@@ -1,0 +1,58 @@
+To test the build phase we have entered random words with random tabs and enters allong with letter. Example below:
+ 
+ 
+ hi my	  name
+ jui     jijguhief f wef we f we fwe fw ef wef e fwe
+ hi
+ fw ef wfw ffqwbf qwf qw fqw fqwf wqf eqf e few
+ fewf wef
+ wef
+ we fq
+ 	w dq
+ 		 j		b		b	ub	
+ 		 wff
+ q fq fq ibwdbwdas
+ 		 a
+sdas
+ 		 das
+dadasdad
+wda
+
+
+This was able to produce:
+
+0000	fwe
+00010	wff
+00011	jijguhief
+0010	b
+00110	sdas
+00111	fqw
+0100	f
+01010	eqf
+01011	few
+01100	qwf
+011010	ffqwbf
+011011	ub
+0111	we
+1000	fq
+100100	dq
+100101	wfw
+100110	j
+100111	w
+10100	hi
+101010	qw
+101011	a
+1011	wef
+110000	q
+110001	wqf
+11001	ef
+11010	e
+110110	fewf
+110111	name
+111000	ibwdbwdas
+111001	fqwf
+111010	das
+111011	jui
+11110	fw
+111110	my
+111111	dadasdad
