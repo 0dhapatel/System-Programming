@@ -3,6 +3,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h> 
 
 // inserts words in string array if not in already 
 // adds in frequency array
@@ -10,10 +13,13 @@
 int inserts(char *word, char** str, int*freq, int num)
 {
     int i;
+    //printf("%d\n",num);
+    //printf("'%s'\n", word);
+    //printf("%d\n",strlen(word));
     for(i=0;i<num;i++){
         if(str[i]==NULL){
             str[i]=malloc((strlen(word)+1)*sizeof(char));
-            strncpy(str[i],word,(strlen(word)+1));
+            strncpy(str[i],word,(strlen(word)));
             freq[i]=1;
             return 1;
         }
@@ -25,30 +31,46 @@ int inserts(char *word, char** str, int*freq, int num)
     return 0;
 }
 
-int main () 
+int main() 
 {
-    char myStr[] = "hi my\n   my  name is \t  bob do u now it starts    with b.";
+    struct stat check;
     // grabs from file and inserts it into the string array or adds in the frequency array
-    char **str= (char**)malloc(50 * sizeof (char*));
-    int *freq= malloc(50 * sizeof(int));
-    char *word = strtok (myStr, " \t\n");
-    int num=50,j;
-    while (word != NULL) {
-        j=inserts(word, str, freq, num);
-        if(j){
-            num=num+50;
-            str=(char**)realloc(str,(num)*sizeof(char*));
-            freq=(int*)realloc(freq,(num)*sizeof(int));
-            str[num-50]=malloc((strlen(word)+1)*sizeof(char));
-            strncpy(str[num-50],word,(strlen(word)+1));
-            freq[num-50]=1;
-        }
-        printf ("%s\n", word);
-        word = strtok (NULL, " \t\n");
+    int file=open("t.txt", O_RDONLY);
+    //printf("%d\n",check.st_size);
+    char* myStr;
+    if (stat("t.txt",&check)==0){
+    	myStr=(char*)malloc((check.st_size)*sizeof(char));
+    	//printf("%d\n",check.st_size);
+    	read(file,myStr,check.st_size);
+    	//printf("%d\n",check.st_size);
     }
-    putchar ('\n');
-    printf("\n\n%s\t%d\n",str[1],freq[1]);
-    int size = sizeof (freq)/ sizeof (int);
-    printf("%d",size);
+    else{
+    	printf("error\n");
+    return 0;
+    }
+    close(file);
+    //printf("%s\n",myStr);
+    char *fill=myStr;
+    int s=check.st_size;
+	char* p;
+    //printf("%d\n\n",check.st_size);
+    char **str= (char**)malloc(100 * sizeof (char*));
+    int *freq= malloc(100 * sizeof(int));
+    int num=100,j=0,no=0;
+    char *ptr;// = strtok(myStr, del);
+	while(ptr=strtok_r(fill," \t\n",&fill))
+	{
+		//printf("ptr=%d\n", strlen(ptr));
+		//printf("ptr=%s\n\n", ptr);
+		j=inserts(ptr, str, freq, num);
+        	if(j==0){
+           		num=num+100;
+            		str=(char**)realloc(str,(num)*sizeof(char*));
+            		freq=(int*)realloc(freq,(num)*sizeof(int));
+            		str[num-100]=malloc((strlen(ptr)+1)*sizeof(char));
+            		strncpy(str[num-100],ptr,(strlen(ptr)+1));
+            		freq[num-100]=1;
+    		}
+      }
     return 0;
 }
