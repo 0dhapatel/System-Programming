@@ -1,0 +1,16 @@
+Deanna Miceli and Dhaval Patel
+
+The Huffmancode book is made by first tokensizing the file found. The process is similar when there is a R flag. 
+In tokanizing we have used the strtok() function in the string.h header file. After that we have used a parallel array to copy 
+the word from tokanizing to the string 2d pointer. When  a NULL space is found the word is inserted and the frequency becomes 
+When the word is similar to another, the frquency increases instead and the word is kept the same. From there the hufffman 
+codebook is made by calling on the huffman code. The tree is made using the data structure heaps and nodes. The heap is made 
+by realizing how many unique words are preseant. After each comparison the node is either combined with another or combined 
+with the tree based on the comparrison of the numbers in the heap. The samellest number is kept on the left side while the 
+biggest is kept on the right side. Similarlly the left side is binary of 0's while right side is binary of 1's. First we made 
+a leaf node for each remarkable character and amass a min heap of all leaf centers (Min Heap is used as a need line. The 
+estimation of repeat field is used to consider two centers in min store. At first, the least ceaseless character is at root). 
+Next we concentrate two center points with the base repeat from the min store. Then, we made another inside center point with 
+repeat equal to the entire of the two centers frequencies. Make the primary evacuated center as its left child and the other
+removed center as its right tyke. Add this center point to the min heap. The remainder of the center is the root center and 
+the tree is done. Thats how our b flag and R and b flag were taken care of.
