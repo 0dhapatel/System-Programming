@@ -855,6 +855,15 @@ int main(int argc, char **argv)
   			int hfile=open("HuffmanCodebook", O_CREAT | O_APPEND | O_WRONLY, S_IRUSR | S_IWUSR);
   			printc (root, words, pt, hfile);
   			close(hfile);
+			
+			
+			for(int i = 0; i < 100; i++)
+			{
+				free(str[i]);
+			}
+			free(str);
+			free(freq);
+			free(words);
 		}
 	}
   
