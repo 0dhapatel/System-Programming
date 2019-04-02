@@ -102,16 +102,6 @@ void buinode (heapnode *minnode)
     order (minnode, i);
 }
 
-// A  function to print an array of height n 
-void printstr (int str[], int n)
-{
-  int i;
-  for (i = 0; i < n; ++i){
-    printf ("%d", str[i]);
-  }
-  printf ("\n");
-}
-
 // Creates a min heap of capacity equal to height and inserts all character of word[] in min heap. Initially height of min heap is equal to cap 
 heapnode * makenode (char *word[], int freq[], int height)
 {
@@ -150,23 +140,28 @@ huff * maketree (char *word[], int freq[], int height)
 }
 
 // Prints huffman codes from the root of Huffman Tree. It uses str[] to store codes 
-void printc (huff *root, int str[], int top)
+void printc (huff *root, char *str, int top, int file)
 {
   // Assign 0 to left edge and recur 
   if (root->left){
-      str[top] = 0;
-      printc (root->left, str, top + 1);
+      str[top] = '0';
+      printc (root->left, str, top + 1, file);
     }
 
   // Assign 1 to right edge and recur 
   if (root->right){
-      str[top] = 1;
-      printc (root->right, str, top + 1);
+      str[top] = '1';
+      printc (root->right, str, top + 1, file);
     }
   // If this is a leaf node, then it contains one of the input characters, print the character and its code from str[] 
   if (!(root->left) && !(root->right)){
-      printf ("%s: ", root->word);
-      printstr (str, top);
+  		str[top]='\0';
+  		write(file, str, top);
+    	//printf ("%s", str);
+    	write(file, "\t", 1);
+  		write(file, root->word, strlen(root->word));
+  		write(file, "\n", 1);
+      //printf ("\t%s\n", root->word);
     }
 }
 
