@@ -12,28 +12,6 @@
 /***************************************************************************\
 *                                HuffmanTree                                *
 \***************************************************************************/
-// A Huffman tree node 
-typedef struct huffnode
-{
-  // One of the input characters 
-  char *word;
-  // Frequency of the character 
-  unsigned freq;
-  // Left and right child of this node 
-  struct huffnode *left, *right;
-}huff;
-
-// A Min Heap:  Collection of min heap (or Hufmman tree) nodes 
-typedef struct heapnode
-{
-  // Current height of min heap 
-  unsigned height;
-  // capacity of min heap 
-  unsigned cap;
-  // Attay of minnode node pointers 
-  huff **harr;
-}heapnode;
-
 // A  function allocate a new min heap node with given character and frequency of the character 
 huff *node (char *word, unsigned freq)
 {
