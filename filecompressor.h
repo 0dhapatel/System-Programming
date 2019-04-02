@@ -47,6 +47,29 @@ struct node {
 	struct node *right;
 };
 
+// A Huffman tree node 
+typedef struct huffnode
+{
+  // One of the input characters 
+  char *word;
+  // Frequency of the character 
+  unsigned freq;
+  // Left and right child of this node 
+  struct huffnode *left, *right;
+}huff;
+
+// A Min Heap:  Collection of min heap (or Hufmman tree) nodes 
+typedef struct heapnode
+{
+  // Current height of min heap 
+  unsigned height;
+  // capacity of min heap 
+  unsigned cap;
+  // Attay of minnode node pointers 
+  huff **harr;
+}heapnode;
+
+
 /***************************************************************************\
 *                               FUNCTIONS                                   *
 \***************************************************************************/
