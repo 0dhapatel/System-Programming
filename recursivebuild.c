@@ -21,7 +21,7 @@ void recursivebuild(const char *file, int in, int num, char** str, int* freq)
                 continue;
             snprintf(place, sizeof(place), "%s/%s", file, dir->d_name);
             printf("%*s-> %s\n", in, "", dir->d_name);
-            list(place, in + 2);
+            recursivebuild(place, in + 2);
         } else {
             printf("%*s- %s\n", in, "", dir->d_name);
             tokenizer(str,freq,dir->d_name);
