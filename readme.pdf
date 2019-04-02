@@ -24,3 +24,10 @@ For compress() the function searchWord() finds and returns the binary value of t
 value of a given binary string. The return value of these functions is written to the output file until all of the file is read.
 Finally the flies are closed and the tree is freed. 
 
+The main() function in fileCompressor.c examines the given arguments and calls buildMode() on the given arguments. buildMode()
+checks for input error in the number of arguments, ordering of arguments, as well as format of the arguments. It returns ERR to indicate
+error, otherwise returns a struct flags containing the argument information. Main() then examines the returned struct flags and 
+if the -R flag was specified it calls the corresponding recursive functions, otherwise it calls the non-recursive build, compress, 
+and decompress functions.
+
+
