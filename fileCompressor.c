@@ -270,7 +270,7 @@ int main(int argc, char **argv)
   struct flags mode = buildMode(argc, argv);
 	if(mode.operation == ERR) { return 0; }
   
-  else if( (mode.operation == B)&&(strcmp(mode.filename, 0) == 0) )
+  else if( (mode.operation == B)&&(strcmp(mode.filename, "") == 0) )
 	{ //move the filename into the correct field of mode
 		int filesize = strlen(argv[argc-1]);
 		strncpy(mode.filename, argv[argc-1], filesize);
