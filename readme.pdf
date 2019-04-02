@@ -14,3 +14,13 @@ Next we concentrate two center points with the base repeat from the min store. T
 repeat equal to the entire of the two centers frequencies. Make the primary evacuated center as its left child and the other
 removed center as its right tyke. Add this center point to the min heap. The remainder of the center is the root center and 
 the tree is done. Thats how our b flag and R and b flag were taken care of.
+
+
+Compress and Decompress both rely on Binary Trees which are contructed based on the codebook given to us. The binary tree nodes
+contain the binary value and word for each token in the codebook, and the nodes are constructed with the function newNode() and 
+freed with the function freeNodes(). Compress() and decompress() open and read the given files, create nodes, and insert them 
+using insertGivenToks(). Then an output file is opened, the file for compression/decompression is opened and read to find the tokens.
+For compress() the function searchWord() finds and returns the binary value of the given word; similarly searchBin() finds and returns the token 
+value of a given binary string. The return value of these functions is written to the output file until all of the file is read.
+Finally the flies are closed and the tree is freed. 
+
