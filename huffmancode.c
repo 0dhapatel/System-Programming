@@ -2,6 +2,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+/***************************************************************************\
+*                                HuffmanTree                                *
+\***************************************************************************/
 // A Huffman tree node 
 typedef struct huffnode
 {
@@ -165,16 +168,3 @@ void printc (huff *root, char *str, int top, int file)
     }
 }
 
-// Driver program to test above functions 
-int main ()
-{
-  char *str[] = { "'ade'", "'b'", "'c'", "'d'", "'e'", "'f'" };
-  int freq[] = { 45, 9, 13, 13, 16, 5 };
-  int height = sizeof (str) / sizeof (str[0]);
-  printf("%d\n\n",height);
-   huff *root = maketree (str, freq, height);
-  // Prints out Huffman codes using the Huffman tree built above 
-  int words[100], pt = 0; // used 100 randomly
-  printc (root, words, pt);
-  return 0;
-}
