@@ -22,6 +22,8 @@ void err(int type)
 	else if(type == 5) { write(STDERR, "Missing information needed to use fileCompressor.\n", 50); }
 	else if(type == 6) { write(STDERR, "Cannot perform the operation without recursion.\n", 48); }
 	else if(type == 7) { write(STDERR, "Error opening file\n", 20); }
+	else if(type == 8) { write(STDERR, "Error compressing the files\n", 28); }
+	else if(type == 9) { write(STDERR, "Error decompressing the files\n", 30); }
 }
 char* updatePathSize(char *new, char *pathname)
 {//update the size of the char *pathname to avoid undefined behavior/segfault
@@ -43,7 +45,6 @@ char* updatePathSize(char *new, char *pathname)
 	{//there is no remaining bytes in the pathname for the next allocation, so expand the size
 		pathname = realloc(pathname, (totalSize + PATH_SIZE));
 	}
-
 	return pathname;
 }
 char* updatePathname(char *pathname, char *name)
@@ -109,6 +110,7 @@ struct flags buildMode(int numArgs, char **argv)
 			int check2 = checkHCZ(argv[numArgs-2]);
 			if( (check1 == 1)||(check2 == 1) ) 
 			{ 
+				printf("hmm\n");
 				err(2); 
 				mode.operation = ERR;
 				break;
@@ -256,29 +258,528 @@ char* findLast(char *pathname)
 	}
 	return second; //will return the original pathname if there is <= 1 token
 }
+struct node *newNode(char *token, char *binVal)
+{//(o^^)o ~ initialize the new node ~ o(^^o)
+	struct node *new = malloc(sizeof(struct node));
+	new->token = malloc(TOK_SIZE);
+	if(token == 0) { new->token = NULL; }
+	else { strncpy(new->token, token, strlen(token)); }
+	new->binVal = malloc(BIN_SIZE);
+	if(binVal == 0) { new->binVal = NULL; }
+	else { strncpy(new->binVal, binVal, strlen(binVal)); }
+	new->freq = 0;
+	//leaf node: height is -1, null ptr children
+	new->height = -1; //we don't need this for BST.c
+	new->left = NULL;
+	new->right = NULL;
+	return new;
+}
+char *searchWord(struct node *root, char *word)
+{
+	if( (root == NULL)||(strcmp(word,"") == 0) ) { return NULL; }
+
+	if(strcmp(root->token, word) == 0) { return root->binVal; }
+
+	char *retVal;
+
+	//check the left
+	if(root->left) 
+	{ 
+		retVal = searchWord(root->left, word); 
+		if(retVal != NULL) { return retVal; }
+	}
+	//check the right
+	if(root->right)
+	{
+		retVal = searchWord(root->right, word);
+		if(retVal != NULL) { return retVal; }
+	}
+
+	return NULL;
+
+}
+struct node *insertGivenToks(struct node *root, struct node *new)
+{//for compressing and decompressing, build a tree from the given codebook. no need to balance the tree bc the encoding was already determined
+	int i = 0;
+	int pathSize = strlen(new->binVal);
+	char cur = new->binVal[i];
+	
+	if( (root->token == NULL)||(pathSize == 0) ) { return new; }
+	//the token is uninitialized, we are at a dummy variable?
+	else if(cur == '\0') { return NULL; }
+	//base case:
+	else if( (root->token == new->token)&&(root->binVal) ) { return root; } //no need to insert twice :)  / avoid initialization error (root->binVal) is false for dummy nodes
+	
+	do { //traverse the tree depending on the value at binVal, add the new node in the correct place
+		if(cur == '0')
+		{//go to the left, either adding the new node or adding a dummy node
+			if( (pathSize-1) == i)
+			{ 
+				root->left = new; 
+				return root;
+			}
+			else if(root->left == NULL)
+			{
+				struct node *dummy = newNode("dummy", 0);
+				root->left = dummy;
+				root = root->left;
+			}
+			else { root = root->left; }
+		}
+		else if(cur == '1')
+		{//go to the right, either add the new node or a dummy node
+			if( (pathSize-1) == i)
+			{
+				root->right = new;
+				return root;
+			}
+			else if(root->right == NULL)
+			{
+				struct node *dummy = newNode("dummy", 0);
+				root->right = dummy;
+				root = root->right;
+			}
+			else { root = root->right; }
+		}
+		else
+		{
+			return NULL;
+		}
+		++i;
+		cur = new->binVal[i];
+	}while( (pathSize > i)&&(cur != '\0') );
+	//if we get here, something was worng
+	return NULL;
+	return root;
+}
+int compress(char *filename, char *codebook)
+{
+	//open the codebook
+	int codebookFD = open(codebook, O_RDONLY, 0);
+	if(codebook < 0)
+	{
+		printf("Error opening codebook %s : %s\n", codebook, strerror(errno));
+		return 0;
+	}
+
+	/**struct stat check;
+	int checkie = stat(codebook, &check);
+	if(S_ISREG(checkie)) { printf("its a file \n"); }
+	else { printf("sisreg determined it is not a file\n"); }**/
+
+	off_t codebookSize = lseek(codebookFD, SEEK_CUR, SEEK_END);
+	if(codebookSize < 0)
+	{
+		printf("error gettig size of codebook from lseek: %s", strerror(errno));
+		return 0;
+	}
+	else if(codebookSize == 0)
+	{
+		printf("Given an invalid codebook %s\n", codebook);
+		return 0;
+	}
+
+	off_t reset = lseek(codebookFD, 0, SEEK_SET);
+	if(reset < 0)
+	{
+		printf("error reseting the offset of %s: %s\n", codebook, strerror(errno));
+		return 0;
+	}
+	struct node *tree;
+	tree = newNode("root", 0);
+	struct node *root;
+	root = tree;
+	//read the codebook
+	char token[TOK_SIZE] = "\0";
+	char binVal[BIN_SIZE] = "\0";
+	size_t checkReadSize;
+	int i = 0;
+
+	while(i <= codebookSize)
+	{ //add each token of the codebook to the tree
+		char cur;
+		int retVal = read(codebookFD, &cur, 1);
+		if(retVal < 0) { printf("error reading!\n"); }
+		else if(retVal == 0) 
+		{ 
+			break; 
+		} //EOF
+		if( ((cur == '/')&&(i < 2))||(cur == '\t') )
+		{ 
+			++i;
+			continue; 
+		}
+		else if( (cur == '0')&&(token[0] == '\0') )
+		{
+			strcat(binVal, "0");
+		}
+		else if( (cur == '1')&&(token[0] == '\0') )
+		{
+			strcat(binVal, "1");
+		}
+		else if(cur == '\n')
+		{
+			if(token[0] == '\0') 
+			{ 
+				++i;
+				continue; 
+			}
+			struct node *new;
+			new = newNode(token, binVal);
+			tree = insertGivenToks(tree, new);
+			tree = root;
+			strncpy(token, "", 1);
+			strncpy(binVal, "", 1);
+		}
+		else
+		{
+			if(token[0] == '\0')
+			{
+				strcpy(token, ((char[2]) { (char) cur, '\0'}) );
+			}
+			else
+			{
+				char buff[2];
+				strcpy(buff, ((char[2]) { (char) cur, '\0' }) );
+				strcat(token, buff);
+			}
+		}
+		++i;
+	}
+
+	close(codebookFD);
+
+	if(checkReadSize == -1)
+	{
+		printf("error reading codebook %s: %s\n", codebook, strerror(errno));
+		return 0;
+	}
+	else if(i != (codebookSize-1) )
+	{
+		printf("could not read the entire codebook %s\n", codebook);
+		return 0;
+	}
+	//create a return file
+	int retFile = open("compression_result.hcz.txt", O_RDWR|O_CREAT|O_APPEND, 00666);
+	if(retFile < 0)
+	{
+		printf("error creating the result file: %s\n", strerror(errno));
+		return 0;
+	}
+
+	//open the given file
+	/**
+	checkie = stat(filename, &check);
+	if(checkie < 0) { printf("error: %s\n", strerror(errno)); }
+
+	if(S_ISREG(checkie)) { printf("its a file \n"); }
+	else { printf("sisreg determined it is not a file\n"); } **/
+
+	int fileFD = open(filename, O_RDONLY);
+	if(fileFD < 0)
+	{
+		printf("error opening the file %s: %s\n", filename, strerror(errno));
+		return 0;
+	}
+
+	codebookSize = lseek(fileFD, SEEK_CUR, SEEK_END);
+	if(codebookSize < 0)
+	{
+		printf("error gettig size of codebook from lseek: %s", strerror(errno));
+		return 0;
+	}
+	else if(codebookSize == 0)
+	{
+		printf("Given an invalid codebook %s\n", codebook);
+		return 0;
+	}
+
+	reset = lseek(fileFD, 0, SEEK_SET);
+	if(reset < 0)
+	{
+		printf("error reseting the offset of %s: %s\n", codebook, strerror(errno));
+		return 0;
+	}
+
+	char current;
+	i = 0;
+	strncpy(token, "", 1);
+
+	while(i <= codebookSize)
+	{
+		//read each token (deliminers are specified, check the assignemnt description)
+		int retV = read(fileFD, &current, 1);
+		if(token[0] == '\0') { strcpy(token, ((char[2]) { (char) current, '\0'})); }
+		else 
+		{
+			char bufff[2];
+			strcpy(bufff, ((char[2]) { (char) current, '\0'}));
+			strcat(token, bufff);
+		}
+		//find the value of the token 
+		char *retB = searchWord(tree, token);
+		if(retB == NULL) 
+		{ 
+			++i;
+			continue; 
+		}
+		else
+		{ //add the value of the token to the return file
+			write(retFile, retB, strlen(retB));
+			strncpy(token, "", 1);
+		}
+		++i;
+		retB = NULL;
+	}
+	
+	close(fileFD);
+	close(retFile);
+	return 1;
+}
+struct node *traverse(struct node *root, char binVal)
+{
+	if(root == NULL) { return NULL; }
+	if(binVal == '\0') { return root; }
+	else
+	{
+		if(binVal == '0') { return root->left; }
+		else { return root->right; }
+	}
+}
+char *searchBin(struct node *root, char *binVal)
+{
+	if(root == NULL) { return NULL; }
+	else if(binVal[0] == '\0') { return NULL; }
+
+	struct node *ret;
+	ret = root;
+	int length = strlen(binVal);
+	for(int i = 0; i < length; i++)
+	{
+		ret = traverse(ret, binVal[i]);
+	}
+	if( ret == NULL) { return "-1"; }
+	else if( (strcmp(ret->token, "dummy") == 0)||(strcmp(ret->token, "root")== 0) ) { return "-1"; }
+	return ret->token;
+}
+int decompress(char *filename, char *codebook)
+{
+	int codebookFD = open(codebook, O_RDONLY, 0);
+	if(codebookFD < 0) { return 0; }
+
+	off_t codebookSize = lseek(codebookFD, SEEK_CUR, SEEK_END);
+	if(codebookSize < 0)
+	{
+		printf("error gettig size of codebook from lseek: %s", strerror(errno));
+		return 0;
+	}
+	else if(codebookSize == 0)
+	{
+		printf("Given an invalid codebook %s\n", codebook);
+		return 0;
+	}
+
+	off_t reset = lseek(codebookFD, 0, SEEK_SET);
+	if(reset < 0)
+	{
+		printf("error reseting the offset of %s: %s\n", codebook, strerror(errno));
+		return 0;
+	}
+
+	struct node *tree;
+	tree = newNode("root", 0);
+	struct node *root;
+	root = tree;
+	//read the codebook
+	char token[TOK_SIZE] = "\0";
+	char binVal[BIN_SIZE] = "\0";
+	size_t checkReadSize;
+	int i = 0;
+
+	while(i <= codebookSize)
+	{ //add each token of the codebook to the tree
+		char cur;
+		int retVal = read(codebookFD, &cur, 1);
+		if(retVal < 0) { printf("error reading!\n"); }
+		else if(retVal == 0) 
+		{ 
+			break; 
+		} //EOF
+		if( ((cur == '/')&&(i < 2))||(cur == '\t') )
+		{ 
+			++i;
+			continue; 
+		}
+		else if( (cur == '0')&&(token[0] == '\0') )
+		{
+			strcat(binVal, "0");
+		}
+		else if( (cur == '1')&&(token[0] == '\0') )
+		{
+			strcat(binVal, "1");
+		}
+		else if(cur == '\n')
+		{
+			if(token[0] == '\0') 
+			{ 
+				++i;
+				continue; 
+			}
+			struct node *new;
+			new = newNode(token, binVal);
+			tree = insertGivenToks(tree, new);
+			tree = root;
+			strncpy(token, "", 1);
+			strncpy(binVal, "", 1);
+		}
+		else
+		{
+			if(token[0] == '\0')
+			{
+				strcpy(token, ((char[2]) { (char) cur, '\0'}) );
+			}
+			else
+			{
+				char buff[2];
+				strcpy(buff, ((char[2]) { (char) cur, '\0' }) );
+				strcat(token, buff);
+			}
+		}
+		++i;
+	}
+
+	close(codebookFD);
+
+	if(checkReadSize == -1)
+	{
+		printf("error reading codebook %s: %s\n", codebook, strerror(errno));
+		return 0;
+	}
+	else if(i != (codebookSize-1) )
+	{
+		printf("could not read the entire codebook %s\n", codebook);
+		return 0;
+	}
+	//create a return file
+	int retFile = open("decompression_result.txt", O_RDWR|O_CREAT|O_APPEND, 00666);
+	if(retFile < 0)
+	{
+		printf("error creating the result file: %s\n", strerror(errno));
+		return 0;
+	}
+
+	int fileFD = open(filename, O_RDONLY);
+	if(fileFD < 0)
+	{
+		printf("error opening the file %s: %s\n", filename, strerror(errno));
+		return 0;
+	}
+
+	codebookSize = lseek(fileFD, SEEK_CUR, SEEK_END);
+	if(codebookSize < 0)
+	{
+		printf("error gettig size of codebook from lseek: %s", strerror(errno));
+		return 0;
+	}
+	else if(codebookSize == 0)
+	{
+		printf("Given an invalid codebook %s\n", codebook);
+		return 0;
+	}
+
+	reset = lseek(fileFD, 0, SEEK_SET);
+	if(reset < 0)
+	{
+		printf("error reseting the offset of %s: %s\n", codebook, strerror(errno));
+		return 0;
+	}
+
+	i = 0;
+	strncpy(binVal, "", 1);
+	char current;
+	char *retB;
+
+	while(i <= codebookSize)
+	{
+		int retVal = read(fileFD, &current, 1);
+		if(binVal[0] == '\0') { strcpy(binVal, ((char[2]) { (char) current, '\0'})); }
+		else 
+		{
+			char bufff[2];
+			strcpy(bufff, ((char[2]) { (char) current, '\0'}));
+			strcat(binVal, bufff);
+		}
+
+		retB = searchBin(tree, binVal);
+		if(strcmp(retB, "-1") == 0) 
+		{
+			++i;
+			continue;
+		}
+		else
+		{
+			write(retFile, retB, strlen(retB));
+			strncpy(binVal, "", 1);
+		}
+		++i;
+	}
+
+	close(fileFD);
+	close(retFile);
+	return 1;
+}	
 /***************************************************************************\
 *                                    MAIN                                   *
 \***************************************************************************/
 int main(int argc, char **argv)
 {
-  if(argc < 3)
-  { 
-    err(5);
-    return 0;
-  }
-  
-  struct flags mode = buildMode(argc, argv);
+	if(argc < 3)
+	{ 
+		err(5);
+		return 0;
+	}
+
+	struct flags mode = buildMode(argc, argv);
+	
 	if(mode.operation == ERR) { return 0; }
-  
-  else if( (mode.operation == B)&&(strcmp(mode.filename, "") == 0) )
+	else if( (mode.operation == B)&&(strcmp(mode.filename, "") == 0) )
 	{ //move the filename into the correct field of mode
 		int filesize = strlen(argv[argc-1]);
 		strncpy(mode.filename, argv[argc-1], filesize);
 	}
+	
+  	int retVal;
+	if(mode.recursive == R)
+	{
+
+
+	}
+	else
+	{
+		if(mode.operation == C)
+		{
+			retVal = compress(mode.filename, mode.codebook);
+			if(retVal == 0) 
+			{ 
+				err(8);
+				return 0;
+			}
+		}
+		else if(mode.operation == D)
+		{
+			retVal = decompress(mode.filename, mode.codebook);
+			if(retVal == 0) 
+			{ 
+				err(9);
+				return 0;
+			}
+		}
+		else //mode.operation == B ; non recursive build 
+		{
+
+		}
+	}
   
-  //if mode.recursive == R , do recursion
-  //else do non-recursive calls
-  
-  return 0;
+	return 0;
 }
 
