@@ -1,3 +1,5 @@
+All of our testcases consited of easy testcases in order to find out if the project worked accordingly. Additionally, we had complecated testcases that we thought were difficult to go over. For recursive flag, we had to create multiple text files with sub directories.
+
 To test the build phase we have entered random words with random tabs and enters allong with letter. Example below:
  
  
