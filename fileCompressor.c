@@ -887,23 +887,26 @@ int main(int argc, char **argv)
   	int retVal;
 	if(mode.recursive == R)
 	{
-		if // recursive and build
-		recursivebuild(".",0);
-    int height=0;
-    while(freq[height]>=1){height++;}
-   	huff *root = maketree (str, freq, height-1);
-  	// Prints out Huffman codes using the Huffman tree built above 
-  	int pt = 0;
-  	char*words=malloc((height-1)*sizeof(char));
-  	int hfile=open("HuffmanCodebook", O_CREAT | O_APPEND | O_WRONLY, S_IRUSR | S_IWUSR);
-  	printc (root, words, pt, hfile);
-  	close(hfile);
+		if(mode.operation == B){
+			recursivebuild(".",0);
+    			int height=0;
+    			while(freq[height]>=1){height++;}
+   			huff *root = maketree (str, freq, height-1);
+  			// Prints out Huffman codes using the Huffman tree built above 
+  			int pt = 0;
+  			char*words=malloc((height-1)*sizeof(char));
+  			int hfile=open("HuffmanCodebook", O_CREAT | O_APPEND | O_WRONLY, S_IRUSR | S_IWUSR);
+  			printc (root, words, pt, hfile);
+  			close(hfile);
+		}
 		
-		if // recursive and compress
+		if(mode.operation == C){
 			recursivecompress(".",0,mode.codebook);
+		}
 		
-		if // recursive and decompress
+		if(mode.operation == D){
 			recursivedecompress(".",0, mode.codebook);
+		}
 
 	}
 	else
@@ -926,7 +929,7 @@ int main(int argc, char **argv)
 				return 0;
 			}
 		}
-		else //mode.operation == B ; non recursive build 
+		else if(mode.operation == B) //; non recursive build 
 		{
 			char **str= (char**)malloc(100 * sizeof (char*));
     			int *freq= malloc(100 * sizeof(int));
