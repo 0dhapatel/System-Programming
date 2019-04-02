@@ -731,6 +731,69 @@ int decompress(char *filename, char *codebook)
 	close(retFile);
 	return 1;
 }	
+
+// inserts words in string array if not in already 
+// adds in frequency array
+
+int inserts(char *word, char** str, int*freq, int num)
+{
+    int i;
+    //printf("%d\n",num);
+    //printf("'%s'\n", word);
+    //printf("%d\n",strlen(word));
+    for(i=0;i<num;i++){
+        if(str[i]==NULL){
+            str[i]=malloc((strlen(word)+1)*sizeof(char));
+            strncpy(str[i],word,(strlen(word)));
+            freq[i]=1;
+            return 1;
+        }
+        if(strcmp(word,str[i])==0){
+            freq[i]=freq[i]+1; 
+            return 1;
+        }
+    }
+    return 0;
+}
+int num=1000;
+int tokenizer(char** str, int*freq, char* filename)
+{
+	struct stat check;
+    // grabs from file and inserts it into the string array or adds in the frequency array
+	int file=open(filename, O_RDONLY);  ////filename has to be added given
+    //printf("%d\n",check.st_size);
+    char* myStr;
+    if (stat("t.txt",&check)==0){
+    	myStr=(char*)malloc((check.st_size)*sizeof(char));
+    	//printf("%d\n",check.st_size);
+    	read(file,myStr,check.st_size);
+    	//printf("%d\n",check.st_size);
+    }
+    else{
+    	printf("error\n");
+    }
+    close(file);
+    //printf("%s\n",myStr);
+    char *fill=myStr;
+    //int s=check.st_size;
+    //printf("%d\n\n",check.st_size);
+	int j=0;
+	char *ptr;// = strtok(myStr, del);
+	while(ptr=strtok_r(fill," \t\n",&fill)){
+		//printf("ptr=%d\n", strlen(ptr));
+		printf("ptr=%s\n\n", ptr);
+		j=inserts(ptr, str, freq, num);
+        	if(j==0){
+           		num=num+1000;
+            	str=(char**)realloc(str,(num)*sizeof(char*));
+            	freq=(int*)realloc(freq,(num)*sizeof(int));
+            	str[num-1000]=malloc((strlen(ptr)+1)*sizeof(char));
+            	strncpy(str[num-1000],ptr,(strlen(ptr)+1));
+            	freq[num-1000]=1;
+    		}
+      }
+}
+
 /***************************************************************************\
 *                                    MAIN                                   *
 \***************************************************************************/
@@ -779,7 +842,19 @@ int main(int argc, char **argv)
 		}
 		else //mode.operation == B ; non recursive build 
 		{
-
+			char **str= (char**)malloc(100 * sizeof (char*));
+    			int *freq= malloc(100 * sizeof(int));
+    			int num=100;
+    			num=tokenizer(str,freq,mode.filename);
+    			int height=0;
+      			while(freq[height]>=1){height++;}
+   			huff *root = maketree (str, freq, height-1);
+  			// Prints out Huffman codes using the Huffman tree built above 
+  			int pt = 0;
+  			char*words=malloc((height-1)*sizeof(char));
+  			int hfile=open("HuffmanCodebook", O_CREAT | O_APPEND | O_WRONLY, S_IRUSR | S_IWUSR);
+  			printc (root, words, pt, hfile);
+  			close(hfile);
 		}
 	}
   
