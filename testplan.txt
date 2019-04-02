@@ -58,3 +58,60 @@ This was able to produce:
 11110	fw
 111110	my
 111111	dadasdad
+
+For compression and decompression two files are given as arguments
+
+Example 1
+Codebook:
+/
+100000	Hi
+110000	Will
+111000	You
+111100	Please
+111110	pLeaseZ
+111111	Do
+011111	Me
+001111	A
+000111	Favor
+000011	And
+000001	Kindly
+0000001	DIE
+1111011	On
+1000011	My
+1000111	watch
+1001111	It
+1011111	Make
+0111110	Feel
+0111100	Pretty
+0111000	Darn
+0110000	Good
+0100000	If
+101000	I
+101100	Say
+101110	So
+110100	Myself.
+110110	Thanks.
+110111	Bye!
+111010	Me
+111011	 
+
+given file:
+Please DIE   On Hi Will Please Good Thanks. Bye! 
+
+expected binaryfile.hcz:
+111100111011000000111101111101111101111110111110111000001110111100001110111111001110110110000111011110110111011110111111011
+
+Example 2
+Codebook:
+/
+01 a
+11  
+001 me
+10 what
+0001 lol
+
+given binary file:
+001110001110001111011011101110111
+
+expected output file:
+me lol lol what a a a a 
