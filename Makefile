@@ -1,19 +1,9 @@
-all: fileCompressor.c huffmancode.o
+all: fileCompressor.c fileCompressor.o
+	gcc -o fileCompressor fileCompressor.o
 
-        gcc -o fileCompressor fileCompressor.c huffmancode.o
-
-
-
-
-huffmancode.o: huffmancode.c huffmancode.h
-
-        gcc -c huffmancode.c
-
-
-
+filecompressor.o: fileCompressor.h 
+	gcc -c fileCompressor.h
 
 clean:
-
-        rm ./fileCompressor ./*.o
-
-            echo Clean done
+	rm ./fileCompressor ./*.o
+		echo Clean done
