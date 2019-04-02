@@ -201,11 +201,11 @@ int inserts(char *word, char** str, int*freq, int num)
     return 0;
 }
 
-int main(int argc, char** argv) 
+int tokenizer(char** str, int*freq, int num, char* filename)
 {
-    struct stat check;
+	struct stat check;
     // grabs from file and inserts it into the string array or adds in the frequency array
-    int file=open(filename, O_RDONLY);  ////filename has to be added given
+	int file=open(filename, O_RDONLY);  ////filename has to be added given
     //printf("%d\n",check.st_size);
     char* myStr;
     if (stat("t.txt",&check)==0){
@@ -216,21 +216,17 @@ int main(int argc, char** argv)
     }
     else{
     	printf("error\n");
-    return 0;
     }
     close(file);
     //printf("%s\n",myStr);
     char *fill=myStr;
     //int s=check.st_size;
     //printf("%d\n\n",check.st_size);
-    char **str= (char**)malloc(100 * sizeof (char*));
-    int *freq= malloc(100 * sizeof(int));
-    int num=100,j=0,no=0;
-    char *ptr;// = strtok(myStr, del);
-	while(ptr=strtok_r(fill," \t\n",&fill))
-	{
+	int j=0;
+	char *ptr;// = strtok(myStr, del);
+	while(ptr=strtok_r(fill," \t\n",&fill)){
 		//printf("ptr=%d\n", strlen(ptr));
-		//printf("ptr=%s\n\n", ptr);
+		printf("ptr=%s\n\n", ptr);
 		j=inserts(ptr, str, freq, num);
         	if(j==0){
            		num=num+100;
@@ -241,12 +237,25 @@ int main(int argc, char** argv)
             	freq[num-100]=1;
     		}
       }
-      int height=0;
+      return num;
+}
+
+int main(int argc, char** argv) 
+{
+    
+    
+
+    char **str= (char**)malloc(100 * sizeof (char*));
+    int *freq= malloc(100 * sizeof(int));
+    int num=100;
+    num=tokenizer(str,freq,num,"t.txt");
+    num=tokenizer(str,freq,num,"g.txt");
+    int height=0;
       while(freq[height]>=1){height++;}
   	//printf("%d\n\n",height);
    huff *root = maketree (str, freq, height-1);
   // Prints out Huffman codes using the Huffman tree built above 
-  int /*words[100],*/ pt = 0;
+  int pt = 0;
   char*words=malloc((height-1)*sizeof(char));// used 100 randomly
   int hfile=open("HuffmanCodebook", O_CREAT | O_APPEND | O_WRONLY, S_IRUSR | S_IWUSR);
   printc (root, words, pt, hfile);
