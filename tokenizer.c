@@ -31,11 +31,11 @@ int inserts(char *word, char** str, int*freq, int num)
     return 0;
 }
 
-int main() 
+int tokenizer(char** str, int*freq, int num, char* filename)
 {
-    struct stat check;
+	struct stat check;
     // grabs from file and inserts it into the string array or adds in the frequency array
-    int file=open("t.txt", O_RDONLY);
+	int file=open(filename, O_RDONLY);  ////filename has to be added given
     //printf("%d\n",check.st_size);
     char* myStr;
     if (stat("t.txt",&check)==0){
@@ -46,31 +46,34 @@ int main()
     }
     else{
     	printf("error\n");
-    return 0;
     }
     close(file);
     //printf("%s\n",myStr);
     char *fill=myStr;
-    int s=check.st_size;
-	char* p;
+    //int s=check.st_size;
     //printf("%d\n\n",check.st_size);
-    char **str= (char**)malloc(100 * sizeof (char*));
-    int *freq= malloc(100 * sizeof(int));
-    int num=100,j=0,no=0;
-    char *ptr;// = strtok(myStr, del);
-	while(ptr=strtok_r(fill," \t\n",&fill))
-	{
+	int j=0;
+	char *ptr;// = strtok(myStr, del);
+	while(ptr=strtok_r(fill," \t\n",&fill)){
 		//printf("ptr=%d\n", strlen(ptr));
-		//printf("ptr=%s\n\n", ptr);
+		printf("ptr=%s\n\n", ptr);
 		j=inserts(ptr, str, freq, num);
         	if(j==0){
            		num=num+100;
-            		str=(char**)realloc(str,(num)*sizeof(char*));
-            		freq=(int*)realloc(freq,(num)*sizeof(int));
-            		str[num-100]=malloc((strlen(ptr)+1)*sizeof(char));
-            		strncpy(str[num-100],ptr,(strlen(ptr)+1));
-            		freq[num-100]=1;
+            	str=(char**)realloc(str,(num)*sizeof(char*));
+            	freq=(int*)realloc(freq,(num)*sizeof(int));
+            	str[num-100]=malloc((strlen(ptr)+1)*sizeof(char));
+            	strncpy(str[num-100],ptr,(strlen(ptr)+1));
+            	freq[num-100]=1;
     		}
       }
-    return 0;
+      return num;
+}
+int main(int argc, char** argv) 
+{
+    char **str= (char**)malloc(100 * sizeof (char*));
+    int *freq= malloc(100 * sizeof(int));
+    int num=100;
+	tokenizer(str,freq,num,/*filename*/);
+	return 0
 }
