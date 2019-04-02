@@ -33,14 +33,6 @@ void recursivebuild(const char *file, int in, int num, char** str, int* freq)
 int main(int argc, char** argv)
 {
    	recursivebuild(".",0);
-   	int height=0;
-      while(freq[height]>=1){height++;}
-   huff *root = maketree (str, freq, height-1);
-   int pt = 0;
-  char*words=malloc((height-1)*sizeof(char));
-  int hfile=open("HuffmanCodebook", O_CREAT | O_APPEND | O_WRONLY, S_IRUSR | S_IWUSR);
-  printc (root, words, pt, hfile);
-  close(hfile);
     return(0);
 }
 
