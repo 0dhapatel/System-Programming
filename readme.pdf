@@ -21,8 +21,8 @@ contain the binary value and word for each token in the codebook, and the nodes 
 freed with the function freeNodes(). Compress() and decompress() open and read the given files, create nodes, and insert them 
 using insertGivenToks(). Then an output file is opened, the file for compression/decompression is opened and read to find the tokens.
 For compress() the function searchWord() finds and returns the binary value of the given word; similarly searchBin() finds and returns the token 
-value of a given binary string. The return value of these functions is written to the output file until all of the file is read.
-Finally the flies are closed and the tree is freed. 
+value of a given binary string in decompress(). The return value of these functions is written to the output file until all of the file is read.
+Finally the files are closed and the tree is freed. 
 
 The main() function in fileCompressor.c examines the given arguments and calls buildMode() on the given arguments. buildMode()
 checks for input error in the number of arguments, ordering of arguments, as well as format of the arguments. It returns ERR to indicate
