@@ -807,11 +807,11 @@ void recursivebuild(const char *file, int in, char** str, int* freq)
             char place[1024];
             if (strcmp(dir->d_name, ".") == 0 || strcmp(dir->d_name, "..") == 0)
                 continue;
-            snprintf(place, sizeof(place), "%s/%s", file, dir->d_name);
-            printf("%*s-> %s\n", in, "", dir->d_name);
+            //snprintf(place, sizeof(place), "%s/%s", file, dir->d_name);
+            //printf("%*s-> %s\n", in, "", dir->d_name);
             recursivebuild(place, in + 2, char** str, int* freq);
         } else {
-            printf("%*s- %s\n", in, "", dir->d_name);
+            //printf("%*s- %s\n", in, "", dir->d_name);
             tokenizer(str,freq,dir->d_name);
         }
     }
@@ -830,11 +830,11 @@ void recursivecompress(const char *file, int in, char* codebook)
             char place[1024];
             if (strcmp(dir->d_name, ".") == 0 || strcmp(dir->d_name, "..") == 0)
                 continue;
-            snprintf(place, sizeof(place), "%s/%s", file, dir->d_name);
-            printf("%*s-> %s\n", in, "", dir->d_name);
+            //snprintf(place, sizeof(place), "%s/%s", file, dir->d_name);
+            //printf("%*s-> %s\n", in, "", dir->d_name);
             recursivecompress(place, in + 2, codebook);
         } else {
-            printf("%*s- %s\n", in, "", dir->d_name);
+            //printf("%*s- %s\n", in, "", dir->d_name);
             compress(dir->d_name, codebook);// fill in
         }
     }
@@ -853,11 +853,11 @@ void recursivedecompress(const char *file, int in, char* codebook)
             char place[1024];
             if (strcmp(dir->d_name, ".") == 0 || strcmp(dir->d_name, "..") == 0)
                 continue;
-            snprintf(place, sizeof(place), "%s/%s", file, dir->d_name);
-            printf("%*s-> %s\n", in, "", dir->d_name);
+            //snprintf(place, sizeof(place), "%s/%s", file, dir->d_name);
+            //printf("%*s-> %s\n", in, "", dir->d_name);
             recursivedecompress(place, in + 2, codebook);
         } else {
-            printf("%*s- %s\n", in, "", dir->d_name);
+            //printf("%*s- %s\n", in, "", dir->d_name);
             decompress(dir->d_name, codebook);// fill in
         }
     }
