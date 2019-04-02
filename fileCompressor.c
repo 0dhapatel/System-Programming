@@ -756,7 +756,7 @@ int inserts(char *word, char** str, int*freq, int num)
     return 0;
 }
 int num=1000;
-int tokenizer(char** str, int*freq, char* filename)
+void tokenizer(char** str, int*freq, char* filename)
 {
 	struct stat check;
     // grabs from file and inserts it into the string array or adds in the frequency array
@@ -792,6 +792,76 @@ int tokenizer(char** str, int*freq, char* filename)
             	freq[num-1000]=1;
     		}
       }
+	return;
+}
+
+void recursivebuild(const char *file, int in, char** str, int* freq)
+{
+    DIR *d;
+    struct dirent *dir;
+    
+    if (!(d = opendir(file)))
+        return;
+    while ((dir = readdir(d)) != NULL) {
+        if (dir->d_type == DT_DIR) {
+            char place[1024];
+            if (strcmp(dir->d_name, ".") == 0 || strcmp(dir->d_name, "..") == 0)
+                continue;
+            snprintf(place, sizeof(place), "%s/%s", file, dir->d_name);
+            printf("%*s-> %s\n", in, "", dir->d_name);
+            recursivebuild(place, in + 2, char** str, int* freq);
+        } else {
+            printf("%*s- %s\n", in, "", dir->d_name);
+            tokenizer(str,freq,dir->d_name);
+        }
+    }
+    closedir(d);
+}
+
+void recursivecompress(const char *file, int in, char* codebook)
+{
+    DIR *d;
+    struct dirent *dir;
+    
+    if (!(d = opendir(file)))
+        return;
+    while ((dir = readdir(d)) != NULL) {
+        if (dir->d_type == DT_DIR) {
+            char place[1024];
+            if (strcmp(dir->d_name, ".") == 0 || strcmp(dir->d_name, "..") == 0)
+                continue;
+            snprintf(place, sizeof(place), "%s/%s", file, dir->d_name);
+            printf("%*s-> %s\n", in, "", dir->d_name);
+            recursivecompress(place, in + 2, codebook);
+        } else {
+            printf("%*s- %s\n", in, "", dir->d_name);
+            compress(dir->d_name, codebook);// fill in
+        }
+    }
+    closedir(d);
+}
+
+void recursivedecompress(const char *file, int in, char* codebook)
+{
+    DIR *d;
+    struct dirent *dir;
+    
+    if (!(d = opendir(file)))
+        return;
+    while ((dir = readdir(d)) != NULL) {
+        if (dir->d_type == DT_DIR) {
+            char place[1024];
+            if (strcmp(dir->d_name, ".") == 0 || strcmp(dir->d_name, "..") == 0)
+                continue;
+            snprintf(place, sizeof(place), "%s/%s", file, dir->d_name);
+            printf("%*s-> %s\n", in, "", dir->d_name);
+            recursivedecompress(place, in + 2, codebook);
+        } else {
+            printf("%*s- %s\n", in, "", dir->d_name);
+            decompress(dir->d_name, codebook);// fill in
+        }
+    }
+    closedir(d);
 }
 
 /***************************************************************************\
@@ -817,7 +887,23 @@ int main(int argc, char **argv)
   	int retVal;
 	if(mode.recursive == R)
 	{
-
+		if // recursive and build
+		recursivebuild(".",0);
+    int height=0;
+    while(freq[height]>=1){height++;}
+   	huff *root = maketree (str, freq, height-1);
+  	// Prints out Huffman codes using the Huffman tree built above 
+  	int pt = 0;
+  	char*words=malloc((height-1)*sizeof(char));
+  	int hfile=open("HuffmanCodebook", O_CREAT | O_APPEND | O_WRONLY, S_IRUSR | S_IWUSR);
+  	printc (root, words, pt, hfile);
+  	close(hfile);
+		
+		if // recursive and compress
+			recursivecompress(".",0,mode.codebook);
+		
+		if // recursive and decompress
+			recursivedecompress(".",0, mode.codebook);
 
 	}
 	else
@@ -845,7 +931,7 @@ int main(int argc, char **argv)
 			char **str= (char**)malloc(100 * sizeof (char*));
     			int *freq= malloc(100 * sizeof(int));
     			int num=100;
-    			num=tokenizer(str,freq,mode.filename);
+    			tokenizer(str,freq,mode.filename);
     			int height=0;
       			while(freq[height]>=1){height++;}
    			huff *root = maketree (str, freq, height-1);
@@ -855,15 +941,6 @@ int main(int argc, char **argv)
   			int hfile=open("HuffmanCodebook", O_CREAT | O_APPEND | O_WRONLY, S_IRUSR | S_IWUSR);
   			printc (root, words, pt, hfile);
   			close(hfile);
-			
-			
-			for(int i = 0; i < 100; i++)
-			{
-				free(str[i]);
-			}
-			free(str);
-			free(freq);
-			free(words);
 		}
 	}
   
