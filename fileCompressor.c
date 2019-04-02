@@ -809,7 +809,7 @@ void recursivebuild(const char *file, int in, char** str, int* freq)
                 continue;
             //snprintf(place, sizeof(place), "%s/%s", file, dir->d_name);
             //printf("%*s-> %s\n", in, "", dir->d_name);
-            recursivebuild(place, in + 2, char** str, int* freq);
+            recursivebuild(place, in + 2, str, freq);
         } else {
             //printf("%*s- %s\n", in, "", dir->d_name);
             tokenizer(str,freq,dir->d_name);
@@ -888,7 +888,9 @@ int main(int argc, char **argv)
 	if(mode.recursive == R)
 	{
 		if(mode.operation == B){
-			recursivebuild(".",0);
+			char **str= (char**)malloc(1000 * sizeof (char*));
+    			int *freq= malloc(1000 * sizeof(int));
+    			recursivebuild(".",0,str,freq);
     			int height=0;
     			while(freq[height]>=1){height++;}
    			huff *root = maketree (str, freq, height-1);
@@ -931,9 +933,8 @@ int main(int argc, char **argv)
 		}
 		else if(mode.operation == B) //; non recursive build 
 		{
-			char **str= (char**)malloc(100 * sizeof (char*));
-    			int *freq= malloc(100 * sizeof(int));
-    			int num=100;
+			char **str= (char**)malloc(1000 * sizeof (char*));
+    			int *freq= malloc(1000 * sizeof(int));
     			tokenizer(str,freq,mode.filename);
     			int height=0;
       			while(freq[height]>=1){height++;}
