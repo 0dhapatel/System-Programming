@@ -32,7 +32,7 @@ void recursivebuild(const char *file, int in, int num, char** str, int* freq)
  
 int main(int argc, char** argv)
 {
-   	list(".",0);
+   	recursivebuild(".",0);
    	int height=0;
       while(freq[height]>=1){height++;}
    huff *root = maketree (str, freq, height-1);
