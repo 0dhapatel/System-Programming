@@ -18,58 +18,60 @@ void createdir (char* act)
 {
     int dirc;
     char* dirname = act; 
-    clrscr(); 
-    check = mkdir(dirname); 
+    //clrscr(); 
+    int check = mkdir(dirname,0777); 
     // check if directory is created or not 
     if (!check) 
         printf("Directory created\n"); 
     else { 
         printf("Unable to create directory\n"); 
-        exit(1); 
-    } 
-    getch(); 
-    system("dir/p"); 
-    getch(); 
+        //exit(1); 
+    }  
+    //getch(); 
+    //system("dir/p"); 
+    //getch(); 
+    
+}
+
+void addfile( char* dir, char* act)
+{
+    if (chdir(dir) != 0) { 
+        printf("Cannot open directory"); 
+    }
+    //have to check through manifest
+    int fp=open("Manifest.txt", O_RDWR | O_CREAT, 0777);
+    while(){// check if file is created or not
+        
+    }
+    //read();
+    close(fp);
+    if(creat(act,0777)<0){
+        printf("Error Creating file");
+    }
 }
 
 void deletedir(char* act)
 {
     int cheack;
    char *dirname=act;
-   clrscr(); 
-   gets(dirname);
-   system("dir/p");
    cheack = rmdir(dirname);
    if (!cheack){
       printf("Directory deleted\n");
    }
    else{   
     printf("Unable to remove directory\n"); 
-    getch();
     exit(1);
    }
-  getch();
 }
 
-void addfile(char* act, char* dir)
+void removefile( char* dir, char* act) //removes when nothing in the folder
 {
     if (chdir(dir) != 0) { //have to add / in string
         printf("Cannot open directory"); 
     }
-    //have to check through manifest
-    if(creat(act)!=0){
-        printf("can not create file");
-    }
-}
-
-void removefile(char* act, char* dir)
-{
-    if (chdir(dir) != 0) { //have to add / in string
-        printf("Cannot open directory"); 
-    }
-    
     if (remove(act) == 0){ 
-      printf("Deleted successfully"); 
+      printf("Deleted successfully");
+      // go to manifest and state how the file is removed
    }else{
       printf("Unable to delete the file");
    }
