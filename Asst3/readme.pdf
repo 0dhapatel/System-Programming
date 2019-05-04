@@ -1,0 +1,13 @@
+// what should be included:
+//documenting your design paying particular attention to the thread synchronization requirements of your application.
+
+Thread synchronization is the concurrent execution of two or more threads that share critical resources. Threads should be 
+synchronized to avoid critical resource use conflicts. Otherwise, conflicts may arise when parallel-running threads attempt 
+to modify a common variable at the same time.  two synchronization strategies are used to prevent thread interference and 
+memory consistency errors: 
+Synchronized Method: Includes the synchronized keyword in its declaration. When a thread invokes a synchronized method, 
+synchronized method automatically acquires the intrinsic lock for that method's object and releases it when the method returns,
+even if that return was caused by an uncaught exception.
+Synchronized Statement: Declares a block of code to be synchronized. Unlike synchronized methods, synchronized statements 
+should specify the objects that provide the intrinsic lock. These statements are useful for improving concurrency with 
+fine-grained synchronization, as they enable the avoidance of unnecessary blocking.
