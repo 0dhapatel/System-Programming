@@ -4,6 +4,7 @@
 #include <sys/socket.h>
 #include <linux/in.h>
 #include <unistd.h>
+#include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -15,6 +16,7 @@ typedef struct
 	struct sockaddr address;
 	int addr_len;
 } connection_t;
+
 
 
 /*.    create and remove files and directories   .*/
@@ -33,19 +35,20 @@ void createdir (char* act)
         printf("Unable to create directory\n"); 
         //exit(1); 
     }  
-    //getch(); 
-    //system("dir/p"); 
-    //getch(); 
+    if (chdir(dirname) != 0) { //have to add / in string
+        	printf("Cannot open directory"); 
+    }
+    
     
 }
 
-void addfile( char* dir, char* act)
+/*void addfile( char* dir, char* act)
 {
     if (chdir(dir) != 0) { 
         printf("Cannot open directory"); 
     }
     //have to check through manifest
-    int fp=open("Manifest.txt", O_RDWR | O_CREAT, 0777);
+    int fp=open(".Manifest", O_RDWR | O_CREAT, 0777);
     while(){// check if file is created or not
         
     }
@@ -54,23 +57,19 @@ void addfile( char* dir, char* act)
     if(creat(act,0777)<0){
         printf("Error Creating file");
     }
-}
+}*/
 
 void deletedir(char* act)
 {
-    int cheack;
+   // check if directory is there or not
    char *dirname=act;
-   cheack = rmdir(dirname);
-   if (!cheack){
-      printf("Directory deleted\n");
-   }
-   else{   
-    printf("Unable to remove directory\n"); 
-    exit(1);
-   }
+   char* in;
+   sprintf(in,"rm -r %s",dirname);
+   system(in);
+   
 }
 
-void removefile( char* dir, char* act) //removes when nothing in the folder
+/*void removefile( char* dir, char* act) //removes when nothing in the folder
 {
     if (chdir(dir) != 0) { //have to add / in string
         printf("Cannot open directory"); 
@@ -82,11 +81,21 @@ void removefile( char* dir, char* act) //removes when nothing in the folder
       printf("Unable to delete the file");
    }
     
+}*/
+
+
+/**/
+void rollback(char* dir, int ver){
+	//looks into manifest and prints out the version
 }
 
+void history(){
+}
 
-/* takes in from client in order to do as commanded */
-void * process(void * ptr)  
+void currentversion(){
+}
+
+void * process(void * ptr) // takes in from client in order to do as commanded
 {
 	char * buffer;
 	int len;
@@ -150,7 +159,7 @@ void * process(void * ptr)
         	// send  name to method
         		direcn=strtok(NULL,":");
         		//printf("direc: %s\n", direcn);
-    		}else if(strcmp(command,"push")==0){
+    		}else if(strcmp(command,"push")==0){ // everytime creates new version
         	// send  name to method
         		direcn=strtok(NULL,":");
         		//printf("direc: %s\n", direcn);
@@ -162,18 +171,6 @@ void * process(void * ptr)
         	// send  name to method
         		direcn=strtok(NULL,":");
         		//printf("direc: %s\n", direcn);
-    		}else if(strcmp(command,"add")==0){
-        	// send  name and file to method
-        		direcn=strtok(NULL,":");
-        		//printf("direc: %s\n", direcn);
-        		filen=strtok(NULL,":");
-        		//printf("file: %s\n", filen);
-    		}else if(strcmp(command,"remove")==0){
-        	// send  name and file to method
-        		direcn=strtok(NULL,":");
-        		//printf("direc: %s\n", direcn);
-        		filen=strtok(NULL,":");
-        		//printf("file: %s\n", filen);
     		}else if(strcmp(command,"currentversion")==0){
         	// send  name to method
         		direcn=strtok(NULL,":");
@@ -204,6 +201,14 @@ void * process(void * ptr)
 
 int main(int argc, char ** argv)
 {
+	
+   	if (mkdir(".server_repo",0777) !=0) {
+        	//printf("Directory not created\n"); 
+    	}
+    	if (chdir(".server_repo") != 0) {
+        	//printf("Cannot open directory"); 
+    	}
+    	
 	int sock = -1;
 	struct sockaddr_in address;
 	int port;
@@ -211,7 +216,7 @@ int main(int argc, char ** argv)
 	pthread_t thread;
 
 	/* check for command line arguments */
-	if (argc != 2)
+	if (argc < 2)
 	{
 		fprintf(stderr, "usage: %s port\n", argv[0]);
 		return -1;
@@ -266,7 +271,26 @@ int main(int argc, char ** argv)
 			pthread_create(&thread, 0, process, (void *)connection);
 			pthread_detach(thread);
 		}
+		// try to get more words passed through
+		// control c should close sock
 	}
 	
 	return 0;
 }
+
+
+
+
+/*else if(strcmp(command,"add")==0){
+        	// send  name and file to method
+        		direcn=strtok(NULL,":");
+        		//printf("direc: %s\n", direcn);
+        		filen=strtok(NULL,":");
+        		//printf("file: %s\n", filen);
+    		}else if(strcmp(command,"remove")==0){
+        	// send  name and file to method
+        		direcn=strtok(NULL,":");
+        		//printf("direc: %s\n", direcn);
+        		filen=strtok(NULL,":");
+        		//printf("file: %s\n", filen);
+    		}*/
