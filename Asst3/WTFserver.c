@@ -12,42 +12,7 @@ typedef struct
 	int addr_len;
 } connection_t;
 
-void * process(void * ptr)
-{
-	char * buffer;
-	int len;
-	connection_t * conn;
-	long addr = 0;
 
-	if (!ptr) pthread_exit(0); 
-	conn = (connection_t *)ptr;
-
-	/* read length of message */
-	read(conn->sock, &len, sizeof(int));
-	if (len > 0)
-	{
-		addr = (long)((struct sockaddr_in *)&conn->address)->sin_addr.s_addr;
-		buffer = (char *)malloc((len+1)*sizeof(char));
-		buffer[len] = 0;
-
-		/* read message */
-		read(conn->sock, buffer, len);
-
-		/* print message */
-		printf("%d.%d.%d.%d: %s\n",
-			(int)((addr      ) & 0xff),
-			(int)((addr >>  8) & 0xff),
-			(int)((addr >> 16) & 0xff),
-			(int)((addr >> 24) & 0xff),
-			buffer);
-		free(buffer);
-	}
-
-	/* close socket and clean up */
-	close(conn->sock);
-	free(conn);
-	pthread_exit(0);
-}
 /*.    create and remove files and directories   .*/
 // have to pass strings to client
 
@@ -116,7 +81,100 @@ void removefile( char* dir, char* act) //removes when nothing in the folder
 }
 
 
-/**/
+/* takes in from client in order to do as commanded */
+void * process(void * ptr)  
+{
+	char * buffer;
+	int len;
+	connection_t * conn;
+	long addr = 0;
+
+	if (!ptr) pthread_exit(0); 
+	conn = (connection_t *)ptr;
+
+	/* read length of message */
+	read(conn->sock, &len, sizeof(int));
+	if (len > 0)
+	{
+		addr = (long)((struct sockaddr_in *)&conn->address)->sin_addr.s_addr;
+		buffer = (char *)malloc((len+1)*sizeof(char));
+		buffer[len] = 0;
+
+		/* read message */
+		read(conn->sock, buffer, len);
+
+		/* print message */
+		printf("%d.%d.%d.%d: %s\n",
+			(int)((addr      ) & 0xff),
+			(int)((addr >>  8) & 0xff),
+			(int)((addr >> 16) & 0xff),
+			(int)((addr >> 24) & 0xff),
+			buffer);
+			
+		char temp[1024]; // testing token
+		strcpy(temp,buffer);
+		free(buffer);
+		
+		printf("%s\n",temp);
+		char* command =strtok(temp,":");
+		printf("%s\n",command);
+		
+		if(strcmp(command,"delete")==0){
+		printf("%d\n",strlen(command));
+		int le=atoi(strtok(NULL,":"));
+		printf("%d\n",le);
+		printf("%s\n",temp);}
+		
+		
+		
+		if(strcmp(command,"checkout")){
+        	// send  name
+        	
+    		}else if(strcmp(command,"update")){
+        	// send  name
+        	
+    		}else if(strcmp(command,"upgrade")){
+        	// send  name
+        	
+    		}else if(strcmp(command,"commit")){
+        	// send  name
+        	
+    		}else if(strcmp(command,"push")){
+        	// send  name
+        	
+    		}else if(strcmp(command,"create")){
+        	// send  name
+        		
+    		}else if(strcmp(command,"destroy")){
+        	// send  name
+        	
+    		}else if(strcmp(command,"add")){
+        	// send  name and file
+        	
+		printf("%s\n",response);
+    		}else if(strcmp(command,"remove")){
+        	// send  name and file
+        	
+    		}else if(strcmp(command,"currentversion")){
+        	// send  name
+        	
+    		}else if(strcmp(command,"history")){
+        	// send  name
+        	
+    		}else if(strcmp(command,"rollback")){
+        	// send  name and version
+        	
+    		}
+		
+		
+		
+	}
+
+	/* close socket and clean up */
+	close(conn->sock);
+	free(conn);
+	pthread_exit(0);
+}
 
 int main(int argc, char ** argv)
 {
