@@ -80,13 +80,13 @@ int main(int argc, char ** argv)
 	bzero(response,1024);
 	if(strcmp(argv[1],"sendfile")==0){
         	// send server file
-        	sprintf(response,"%s:%d:%s",argv[1],strlen(argv[2]),argv[2]);
+        	sprintf(response,"%s:%s",argv[1],argv[2]);
     	}else if(argc==3){
         	// send server name
-        	sprintf(response,"%s:%d:%s",argv[1],strlen(argv[2]),argv[2]);
+        	sprintf(response,"%s:%s",argv[1],argv[2]);
     	}else if(argc==4){
         	// send server name and file
-        	sprintf(response,"%s:%d:%s:%d:%s",argv[1],strlen(argv[2]),argv[2],strlen(argv[3]),argv[3]);
+        	sprintf(response,"%s:%s:%s",argv[1],argv[2],argv[3]);
     	}else{
     		return 0;
     	}
@@ -96,6 +96,8 @@ int main(int argc, char ** argv)
 		len = strlen(response);
 		write(sock, &len, sizeof(int));
 		write(sock, response, len);
+			    
+	/* read from server to client */
     
 	/* close socket */
 	close(sock);
