@@ -12,7 +12,38 @@
 void removefile(){ //removes from client manifest
 }
 
-void addfile(){ //adds from client manifest
+void addfile(){ //adds to client manifest
+}
+
+void deletedir(char* act)
+{
+   // check if directory is there or not
+   char *dirname=act;
+   char* in;
+   sprintf(in,"rm -r %s",dirname);
+   system(in);
+   
+}
+
+void createdir (char* act)
+{
+    int dirc;
+    char* dirname = act; 
+    //clrscr(); 
+    int check = mkdir(dirname,0777); 
+    // check if directory is created or not 
+    if (!check) 
+        printf("Directory created\n"); 
+    else { 
+        printf("Unable to create directory\n"); 
+        //exit(1); 
+    }  
+    if (chdir(dirname) != 0) { //have to add / in string
+        	printf("Cannot open directory"); 
+    }
+    creat(".Manifest",0777);
+    
+    
 }
 
 int main(int argc, char ** argv)
