@@ -62,35 +62,135 @@ int main(int argc, char ** argv)
 	/* send text to server */
 	if(strcmp(argv[1],"checkout")){
         	// send server name
+        	len = strlen(argv[1]);
+		write(sock, &len, sizeof(int));
+		write(sock, argv[1], len);
+		len = strlen(argv[2]);
+		write(sock, &len, sizeof(int));
+		write(sock, argv[2], len);
+		read(sock,response,1024);
+		printf("%s\n",response);
     	}else if(strcmp(argv[1],"update")){
         	// send server name
+        	len = strlen(argv[1]);
+		write(sock, &len, sizeof(int));
+		write(sock, argv[1], len);
+		len = strlen(argv[2]);
+		write(sock, &len, sizeof(int));
+		write(sock, argv[2], len);
+		read(sock,response,1024);
+		printf("%s\n",response);
     	}else if(strcmp(argv[1],"upgrade")){
         	// send server name
+        	len = strlen(argv[1]);
+		write(sock, &len, sizeof(int));
+		write(sock, argv[1], len);
+		len = strlen(argv[2]);
+		write(sock, &len, sizeof(int));
+		write(sock, argv[2], len);
+		read(sock,response,1024);
+		printf("%s\n",response);
     	}else if(strcmp(argv[1],"commit")){
         	// send server name
+        	len = strlen(argv[1]);
+		write(sock, &len, sizeof(int));
+		write(sock, argv[1], len);
+		len = strlen(argv[2]);
+		write(sock, &len, sizeof(int));
+		write(sock, argv[2], len);
+		read(sock,response,1024);
+		printf("%s\n",response);
     	}else if(strcmp(argv[1],"push")){
         	// send server name
+        	len = strlen(argv[1]);
+		write(sock, &len, sizeof(int));
+		write(sock, argv[1], len);
+		len = strlen(argv[2]);
+		write(sock, &len, sizeof(int));
+		write(sock, argv[2], len);
+		read(sock,response,1024);
+		printf("%s\n",response);
     	}else if(strcmp(argv[1],"create")){
         	// send server name
+        	len = strlen(argv[1]);
+		write(sock, &len, sizeof(int));
+		write(sock, argv[1], len);
+		len = strlen(argv[2]);
+		write(sock, &len, sizeof(int));
+		write(sock, argv[2], len);
+		read(sock,response,1024);
+		printf("%s\n",response);
     	}else if(strcmp(argv[1],"destroy")){
         	// send server name
+        	len = strlen(argv[1]);
+		write(sock, &len, sizeof(int));
+		write(sock, argv[1], len);
+		len = strlen(argv[2]);
+		write(sock, &len, sizeof(int));
+		write(sock, argv[2], len);
+		read(sock,response,1024);
+		printf("%s\n",response);
     	}else if(strcmp(argv[1],"add")){
         	// send server name and file
+        	len = strlen(argv[1]);
+		write(sock, &len, sizeof(int));
+		write(sock, argv[1], len);
+		len = strlen(argv[2]);
+		write(sock, &len, sizeof(int));
+		write(sock, argv[2], len);
+		len = strlen(argv[3]);
+		write(sock, &len, sizeof(int));
+		write(sock, argv[3], len);
+		read(sock,response,1024);
+		printf("%s\n",response);
     	}else if(strcmp(argv[1],"remove")){
         	// send server name and file
+        	len = strlen(argv[1]);
+		write(sock, &len, sizeof(int));
+		write(sock, argv[1], len);
+		len = strlen(argv[2]);
+		write(sock, &len, sizeof(int));
+		write(sock, argv[2], len);
+		len = strlen(argv[3]);
+		write(sock, &len, sizeof(int));
+		write(sock, argv[3], len);
+		read(sock,response,1024);
+		printf("%s\n",response);
     	}else if(strcmp(argv[1],"currentversion")){
         	// send server name
+        	len = strlen(argv[1]);
+		write(sock, &len, sizeof(int));
+		write(sock, argv[1], len);
+		len = strlen(argv[2]);
+		write(sock, &len, sizeof(int));
+		write(sock, argv[2], len);
+		read(sock,response,1024);
+		printf("%s\n",response);
     	}else if(strcmp(argv[1],"history")){
         	// send server name
+        	len = strlen(argv[1]);
+		write(sock, &len, sizeof(int));
+		write(sock, argv[1], len);
+		len = strlen(argv[2]);
+		write(sock, &len, sizeof(int));
+		write(sock, argv[2], len);
+		read(sock,response,1024);
+		printf("%s\n",response);
     	}else if(strcmp(argv[1],"rollback")){
         	// send server name and version
+        	len = strlen(argv[1]);
+		write(sock, &len, sizeof(int));
+		write(sock, argv[1], len);
+		len = strlen(argv[2]);
+		write(sock, &len, sizeof(int));
+		write(sock, argv[2], len);
+		len = strlen(argv[3]);
+		write(sock, &len, sizeof(int));
+		write(sock, argv[3], len);
+		read(sock,response,1024);
+		printf("%s\n",response);
     	}
     
-    /*. how to send */
-	len = strlen(argv[3]);
-	write(sock, &len, sizeof(int));
-	write(sock, argv[3], len);
-
 	/* close socket */
 	close(sock);
 
