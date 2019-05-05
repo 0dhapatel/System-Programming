@@ -11,6 +11,9 @@ int main(int argc, char ** argv)
 	struct sockaddr_in address;
 	struct hostent * host;
 	int len;
+	char response[1024]; 
+	const char* ip;
+	int portno;
 	
 	/* checking commandline parameter */
 	if (argc < 2)
@@ -19,17 +22,27 @@ int main(int argc, char ** argv)
 		return -1;
 	}
 	
+	fd=open("./.configure", O_RDWR|O_CREAT|O_EXCL,0777);
 	if(strcmp(argv[1],"configure")){
-        	fd=open("./.configure", O_RDWR|O_CREAT|O_EXCL,0777);
-        	ssize_t wr1 = write(fd, argv[2], strlen(argv[2]));
-        	ssize_t wr2 = write(fd, argv[3], strlen(argv[3]));
-        	
-    	}else if (){// if configure is not called
+        	write(fd, argv[2], strlen(argv[2]));
+        	write(fd, "\n", 1);
+        	write(fd, argv[3], strlen(argv[3]));
+        	exit(1);
+    	}else if (fd>0){// if configure is not called and file is available
+    		char* temp=(char*) malloc(sizeof(char)*100);
+    		int size=read(fd,temp,100);
+    		char* in=(char*) malloc(sizeof(char)*(size+1));
+    		strcpy(in,temp);
+    		free(temp);
+    		ip=(strtok(in,"\n");
+    		portno=atoi(strtok(NULL,"\n");
+    		free(in);
+    	}else{
     		exit(1);
     	}
 
 	/* obtain port number */
-	if (sscanf(/*argv[2] port no */, "%d", &port) <= 0)
+	if (sscanf(portno, "%d", &port) <= 0)
 	{
 		fprintf(stderr, "%s: error: wrong parameter: port\n", argv[0]);
 		return -2;
@@ -46,7 +59,7 @@ int main(int argc, char ** argv)
 	/* connect to server */
 	address.sin_family = AF_INET;
 	address.sin_port = htons(port);
-	host = gethostbyname(/*argv[1] host name*/);
+	host = gethostbyname(ip);
 	if (!host)
 	{
 		fprintf(stderr, "%s: error: unknown host %s\n", argv[0], argv[1]);
@@ -58,6 +71,7 @@ int main(int argc, char ** argv)
 		fprintf(stderr, "%s: error: cannot connect to host %s\n", argv[0], argv[1]);
 		return -5;
 	}
+	bzero(response,1240);
 
 	/* send text to server */
 	if(strcmp(argv[1],"checkout")){
