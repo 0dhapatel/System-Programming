@@ -104,66 +104,88 @@ void * process(void * ptr)
 		read(conn->sock, buffer, len);
 
 		/* print message */
-		printf("%d.%d.%d.%d: %s\n",
+		/*printf("%d.%d.%d.%d: %s\n",
 			(int)((addr      ) & 0xff),
 			(int)((addr >>  8) & 0xff),
 			(int)((addr >> 16) & 0xff),
 			(int)((addr >> 24) & 0xff),
-			buffer);
+			buffer);*/
 			
-		char temp[1024]; // testing token
+		char temp[1024];
 		strcpy(temp,buffer);
 		free(buffer);
 		
-		printf("%s\n",temp);
-		char* command =strtok(temp,":");
-		printf("%s\n",command);
+		//printf("temp: %s\n",temp);
+		char* command = strtok(temp,":");
+		//printf("%s\n",command);
 		
-		if(strcmp(command,"delete")==0){
-		printf("%d\n",strlen(command));
-		int le=atoi(strtok(NULL,":"));
-		printf("%d\n",le);
-		printf("%s\n",temp);}
+		//printf("command: %s\n",command);
+		//printf("%d\n",strlen(command));
+		
+		int le1, le2, le3, ver;
+		char* direcn; 
+		char* filen;
+		
+		/*printf("%d\n",le);
+		printf("%s\n",temp);*/
 		
 		
-		
-		if(strcmp(command,"checkout")){
-        	// send  name
-        	
-    		}else if(strcmp(command,"update")){
-        	// send  name
-        	
-    		}else if(strcmp(command,"upgrade")){
-        	// send  name
-        	
-    		}else if(strcmp(command,"commit")){
-        	// send  name
-        	
-    		}else if(strcmp(command,"push")){
-        	// send  name
-        	
-    		}else if(strcmp(command,"create")){
-        	// send  name
-        		
-    		}else if(strcmp(command,"destroy")){
-        	// send  name
-        	
-    		}else if(strcmp(command,"add")){
-        	// send  name and file
-        	
-		printf("%s\n",response);
-    		}else if(strcmp(command,"remove")){
-        	// send  name and file
-        	
-    		}else if(strcmp(command,"currentversion")){
-        	// send  name
-        	
-    		}else if(strcmp(command,"history")){
-        	// send  name
-        	
-    		}else if(strcmp(command,"rollback")){
-        	// send  name and version
-        	
+		if(strcmp(command,"checkout")==0){
+        	// send  name to method
+        		direcn=strtok(NULL,":");
+        		//printf("direc: %s\n", direcn);
+    		}else if(strcmp(command,"update")==0){
+        	// send  name to method
+        		direcn=strtok(NULL,":");
+        		//printf("direc: %s\n", direcn);
+    		}else if(strcmp(command,"upgrade")==0){
+        	// send  name to method
+        		direcn=strtok(NULL,":");
+        		//printf("direc: %s\n", direcn);
+    		}else if(strcmp(command,"commit")==0){
+        	// send  name to method
+        		direcn=strtok(NULL,":");
+        		//printf("direc: %s\n", direcn);
+    		}else if(strcmp(command,"push")==0){
+        	// send  name to method
+        		direcn=strtok(NULL,":");
+        		//printf("direc: %s\n", direcn);
+    		}else if(strcmp(command,"create")==0){
+        	// send  name to method
+        		direcn=strtok(NULL,":");
+        		//printf("direc: %s\n", direcn);
+    		}else if(strcmp(command,"destroy")==0){
+        	// send  name to method
+        		direcn=strtok(NULL,":");
+        		//printf("direc: %s\n", direcn);
+    		}else if(strcmp(command,"add")==0){
+        	// send  name and file to method
+        		direcn=strtok(NULL,":");
+        		//printf("direc: %s\n", direcn);
+        		filen=strtok(NULL,":");
+        		//printf("file: %s\n", filen);
+    		}else if(strcmp(command,"remove")==0){
+        	// send  name and file to method
+        		direcn=strtok(NULL,":");
+        		//printf("direc: %s\n", direcn);
+        		filen=strtok(NULL,":");
+        		//printf("file: %s\n", filen);
+    		}else if(strcmp(command,"currentversion")==0){
+        	// send  name to method
+        		direcn=strtok(NULL,":");
+        		//printf("direc: %s\n", direcn);
+    		}else if(strcmp(command,"history")==0){
+        	// send  name to method
+        		direcn=strtok(NULL,":");
+        		//printf("direc: %s\n", direcn);
+    		}else if(strcmp(command,"rollback")==0){
+        	// send  name and version to method
+        		direcn=strtok(NULL,":");
+        		//printf("direc: %s\n", direcn);
+        		ver=atoi(strtok(NULL,":"));
+        		//printf("verzion: %s\n", filen);
+    		}else{
+    			printf("does not go through\n");
     		}
 		
 		
