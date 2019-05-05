@@ -76,139 +76,26 @@ int main(int argc, char ** argv)
 		fprintf(stderr, "%s: error: cannot connect to host %s\n", argv[0], argv[1]);
 		return -5;
 	}
-	bzero(response,1240);
+	
+	bzero(response,1024);
+	if(strcmp(argv[1],"sendfile")==0){
+        	// send server file
+        	sprintf(response,"%s:%d:%s",argv[1],strlen(argv[2]),argv[2]);
+    	}else if(argc==3){
+        	// send server name
+        	sprintf(response,"%s:%d:%s",argv[1],strlen(argv[2]),argv[2]);
+    	}else if(argc==4){
+        	// send server name and file
+        	sprintf(response,"%s:%d:%s:%d:%s",argv[1],strlen(argv[2]),argv[2],strlen(argv[3]),argv[3]);
+    	}else{
+    		return 0;
+    	}
 
 	/* send text to server */
-	if(strcmp(argv[1],"checkout")){
-        	// send server name
-        	len = strlen(argv[1]);
+		 
+		len = strlen(response);
 		write(sock, &len, sizeof(int));
-		write(sock, argv[1], len);
-		len = strlen(argv[2]);
-		write(sock, &len, sizeof(int));
-		write(sock, argv[2], len);
-		read(sock,response,1024);
-		printf("%s\n",response);
-    	}else if(strcmp(argv[1],"update")){
-        	// send server name
-        	len = strlen(argv[1]);
-		write(sock, &len, sizeof(int));
-		write(sock, argv[1], len);
-		len = strlen(argv[2]);
-		write(sock, &len, sizeof(int));
-		write(sock, argv[2], len);
-		read(sock,response,1024);
-		printf("%s\n",response);
-    	}else if(strcmp(argv[1],"upgrade")){
-        	// send server name
-        	len = strlen(argv[1]);
-		write(sock, &len, sizeof(int));
-		write(sock, argv[1], len);
-		len = strlen(argv[2]);
-		write(sock, &len, sizeof(int));
-		write(sock, argv[2], len);
-		read(sock,response,1024);
-		printf("%s\n",response);
-    	}else if(strcmp(argv[1],"commit")){
-        	// send server name
-        	len = strlen(argv[1]);
-		write(sock, &len, sizeof(int));
-		write(sock, argv[1], len);
-		len = strlen(argv[2]);
-		write(sock, &len, sizeof(int));
-		write(sock, argv[2], len);
-		read(sock,response,1024);
-		printf("%s\n",response);
-    	}else if(strcmp(argv[1],"push")){
-        	// send server name
-        	len = strlen(argv[1]);
-		write(sock, &len, sizeof(int));
-		write(sock, argv[1], len);
-		len = strlen(argv[2]);
-		write(sock, &len, sizeof(int));
-		write(sock, argv[2], len);
-		read(sock,response,1024);
-		printf("%s\n",response);
-    	}else if(strcmp(argv[1],"create")){
-        	// send server name
-        	len = strlen(argv[1]);
-		write(sock, &len, sizeof(int));
-		write(sock, argv[1], len);
-		len = strlen(argv[2]);
-		write(sock, &len, sizeof(int));
-		write(sock, argv[2], len);
-		read(sock,response,1024);
-		printf("%s\n",response);
-    	}else if(strcmp(argv[1],"destroy")){
-        	// send server name
-        	len = strlen(argv[1]);
-		write(sock, &len, sizeof(int));
-		write(sock, argv[1], len);
-		len = strlen(argv[2]);
-		write(sock, &len, sizeof(int));
-		write(sock, argv[2], len);
-		read(sock,response,1024);
-		printf("%s\n",response);
-    	}else if(strcmp(argv[1],"add")){
-        	// send server name and file
-        	len = strlen(argv[1]);
-		write(sock, &len, sizeof(int));
-		write(sock, argv[1], len);
-		len = strlen(argv[2]);
-		write(sock, &len, sizeof(int));
-		write(sock, argv[2], len);
-		len = strlen(argv[3]);
-		write(sock, &len, sizeof(int));
-		write(sock, argv[3], len);
-		read(sock,response,1024);
-		printf("%s\n",response);
-    	}else if(strcmp(argv[1],"remove")){
-        	// send server name and file
-        	len = strlen(argv[1]);
-		write(sock, &len, sizeof(int));
-		write(sock, argv[1], len);
-		len = strlen(argv[2]);
-		write(sock, &len, sizeof(int));
-		write(sock, argv[2], len);
-		len = strlen(argv[3]);
-		write(sock, &len, sizeof(int));
-		write(sock, argv[3], len);
-		read(sock,response,1024);
-		printf("%s\n",response);
-    	}else if(strcmp(argv[1],"currentversion")){
-        	// send server name
-        	len = strlen(argv[1]);
-		write(sock, &len, sizeof(int));
-		write(sock, argv[1], len);
-		len = strlen(argv[2]);
-		write(sock, &len, sizeof(int));
-		write(sock, argv[2], len);
-		read(sock,response,1024);
-		printf("%s\n",response);
-    	}else if(strcmp(argv[1],"history")){
-        	// send server name
-        	len = strlen(argv[1]);
-		write(sock, &len, sizeof(int));
-		write(sock, argv[1], len);
-		len = strlen(argv[2]);
-		write(sock, &len, sizeof(int));
-		write(sock, argv[2], len);
-		read(sock,response,1024);
-		printf("%s\n",response);
-    	}else if(strcmp(argv[1],"rollback")){
-        	// send server name and version
-        	len = strlen(argv[1]);
-		write(sock, &len, sizeof(int));
-		write(sock, argv[1], len);
-		len = strlen(argv[2]);
-		write(sock, &len, sizeof(int));
-		write(sock, argv[2], len);
-		len = strlen(argv[3]);
-		write(sock, &len, sizeof(int));
-		write(sock, argv[3], len);
-		read(sock,response,1024);
-		printf("%s\n",response);
-    	}
+		write(sock, response, len);
     
 	/* close socket */
 	close(sock);
