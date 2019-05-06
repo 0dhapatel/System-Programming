@@ -70,6 +70,37 @@ char *manifest_dir(char *pathname)
     //if a directory, open it and recursively call manifest_dir
     //if file, call manifest_file and store the version number, pathname to the file, and hash of the file all in one line
   //return the values
+	struct dirent *pd;
+	DIR *PD;
+	PD = opendir(pathname);
+	if(PD == NULL)
+	{
+		write(STDERR, "Cannot open the directory\n", 26);
+		return "-1";
+	}
+	struct stat path;
+	char new_pathname[MAXLINE];
+	char *retval;
+	strcat(new_pathname, pathname);
+	while((pd = readdir(PD)) != NULL)
+	{
+		stat(pd, &path);
+		if(S_ISREG(path.st_mode))
+		{
+			retval = manifest_file(pd->d_name)
+		}
+		else if(S_ISDIR(path.st_mode))
+		{
+			strcat(new_pathname, pd->d_name);
+			retval = manifest_dir(new_pathname);
+		}
+		else
+		{
+			continue;
+		}
+	}
+	close(PD);
+	return retval;
 }
 void manifest_scan(char *projectname, int version)
 {
