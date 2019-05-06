@@ -17,6 +17,99 @@ typedef struct
 	int addr_len;
 } connection_t;
 
+int getver(char *name)
+{
+ 	struct dirent *drct;
+    DIR *direc = opendir(name);
+	int latest = 0;
+	if (direc == -1)
+  {
+	printf("project does not exist");
+	return -1;
+  }
+	while ((drct = readdir(direc)) != -1)
+        {
+  		if (latest < atoi(drct->d_name))
+		{
+			latest = atoi(drct->d_name);
+		}
+  	}
+	closedir(direc);
+	return latest;
+}
+
+
+void currentVersion(char *dirname)
+{
+	char dire[100];
+	snprintf(dire, sizeof(dire), "./.%s/%s", "server_repo", dirname);
+        DIR *direc = opendir(dire);
+	if (direc == -1)
+        {
+		printf("project does not exist");
+		return;
+        }
+	printf("%s\n", dirname);
+	int num = getver(dire);
+	char vernum[50];
+	sprintf(vernum, "%d", num);
+	char manifest[150];
+	snprintf(manifest, sizeof(manifest), "%s/%s/%s", dire, vernum, ".Manifest");
+
+	int fd = open(manifest, O_RDONLY);
+	char currchar;
+	int pos = 2;
+	off_t end = lseek(fd, 0, SEEK_END);
+	lseek(fd, pos, SEEK_SET);
+
+	while (pos < end)
+	{
+		// print version number
+		read(fd, &currchar, 1);
+		while (currchar != ' ' )
+		{
+			printf("%c", currchar);
+			pos++;
+			lseek(fd, pos, SEEK_SET);
+			read(fd, &currchar, 1);
+		}
+		printf(" ");
+		pos+=2;
+		lseek(fd, pos, SEEK_SET);
+		int last = pos;
+		int wc = 0;
+		// parse and print file name
+		while (1)
+		{
+			read(fd, &currchar, 1);
+			if (currchar == ' ')
+			{
+				lseek(fd, last + 1, SEEK_SET);
+				char *filen = malloc(sizeof(char) * wc+1);
+				read(fd, filen, wc);
+				printf("%s\n", filen);
+				// skip over hashed file content
+				while (currchar != '\n')
+				{
+					pos++;
+					lseek(fd, pos, SEEK_SET);
+					read(fd, &currchar, 1);
+				}
+				break;
+			}
+			else if (currchar == '/')
+			{
+				last = pos;
+				wc = 0;
+			}
+			pos++;
+			wc++;
+		}
+		pos++;
+		lseek(fd, pos, SEEK_SET);
+	}
+	closedir(direc);
+}
 
 
 /*.    create and remove files and directories   .*/
