@@ -8,6 +8,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <stdlib.h>
+#include <openssl/sha.h>
 
 void sendFile(char *name,int sock){
 
