@@ -35,27 +35,34 @@ char *manifest_hash(char *line)
 }
 char *manifest_file(char *pathname)
 {
-	char hash[MAXLINE], line[MAXLINE], *c;
-  //open the file at the pathname for reading
+	char hash[MAXLINE], line[MAXLINE], *c, full[MAXLINE];
 	int fp = open(pathname, O_RDONLY, 0700);
 	if(fp == NULL)
 	{
 		write(STDERR, "Cannot open file to hash\n", 25);
 		return "-1";
 	}
+	strcat(full, "<");
+	
+	//get the version number and store in c
+	//strcat(full, c);
+	
+	strcat(full, "><");
+	strcat(full, pathname);
+	strcat(full, "><");
+
 	while(read(fp, &c, 1) != 0)
 	{
 		if(strcmp(c, '\n') == 0)
-		{ //if we are at the end of a line, get the sha256-hash of the line and reset the hash char
+		{
 			strcat(line, manifest_hash(hash));
 			strncpy(hash, c, 1);
 		}
-    //add the current value to the hash char
 		strcat(hash, c);
 	}
-  //close the file and return the hash of the file
 	close(fp);
-	return line;
+	strcat(full, ">");
+	return full;
 }
 char *manifest_dir(char *pathname)
 {
