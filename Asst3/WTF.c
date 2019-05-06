@@ -421,9 +421,12 @@ int main(int argc, char ** argv)
         	// send server name
         	sprintf(response,"%s:%s",argv[1],argv[2]);
         	if(strcmp(argv[1], "create")){
-        		
+        		createdir(argv[2]);
         	}else if(strcmp(argv[1], "destroy")){
-        		
+        		deletedir(argv[2]);
+        	}else if(strcmp(argv[1], "commit")){
+			commit(argv[2]);
+        		return 0;
         	}
     	}else if(argc==4){
         	// send server name and file
@@ -432,9 +435,11 @@ int main(int argc, char ** argv)
         	}else if(strcmp(argv[1],"add")){
         		//adds into manifest
         		addOrRemoveFile (argv[2], argv[3], 'a');
+			return 0;
         	}else if(strcmp(argv[1],"remove")){
         		//removes into manifest
         		addOrRemoveFile (argv[2], argv[3], 'r');
+			return 0;
         	} 
     	}else{
     		return 0;
@@ -447,7 +452,7 @@ int main(int argc, char ** argv)
 		write(sock, response, len);
 		
 	/* read server to client */
-	
+	// based on what argv[1] is
 
 	/* close socket */
 	close(sock);
