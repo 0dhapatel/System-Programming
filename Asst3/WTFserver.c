@@ -9,15 +9,9 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <string.h>
+#include "WTF.h
 
 /* note to self check if directory is being changed to server_repo properly */
-
-typedef struct
-{
-	int sock;
-	struct sockaddr address;
-	int addr_len;
-} connection_t;
 
 int getver(char *name)
 {
@@ -26,7 +20,7 @@ int getver(char *name)
 	int latest = 0;
 	if (direc == -1)
   {
-	printf("project does not exist");
+	write(STDERR, "project does not exist\n", 23);
 	return -1;
   }
 	while ((drct = readdir(direc)) != -1)
@@ -48,7 +42,7 @@ void currentVersion(char *dirname)
         DIR *direc = opendir(dire);
 	if (direc == -1)
         {
-		printf("project does not exist");
+		write(STDERR, "project does not exist\n", 23);
 		return;
         }
 	printf("%s\n", dirname);
