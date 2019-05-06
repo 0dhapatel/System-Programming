@@ -390,7 +390,7 @@ int main(int argc, char ** argv)
 	}
 
 	/* listen on port */
-	if (listen(sock, 5) < 0)
+	if (listen(sock, 1000) < 0)
 	{
 		fprintf(stderr, "%s: error: cannot listen on port\n", argv[0]);
 		return -5;
