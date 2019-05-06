@@ -10,6 +10,8 @@
 #include <fcntl.h>
 #include <string.h>
 
+/* note to self check if directory is being changed to server_repo properly */
+
 typedef struct
 {
 	int sock;
@@ -111,6 +113,55 @@ void currentVersion(char *dirname)
 	closedir(direc);
 }
 
+void rollback(int ver){
+
+        struct stat check;
+        int vSize;
+        int fd=open(".Version", O_RDONLY);
+        if(stat(".Version",&check)==0)
+                vSize=check.st_size;
+        char *vers=(char*)malloc(sizeof(char)*vSize+1);
+        read(fd,vers,vSize);
+        *(vers+vSize)='\0';
+        close(fd);
+
+        char *token=strtok(vers," \n");
+        int old=atoi(token);
+
+	char delete[15];
+
+	char vertypr[4];
+	strcpy(vertype,"");
+
+	int i;
+	for(i=old;i>ver;i--){
+		strcpy(delete,"rm -r version");
+		sprintf(vertypr,"%d",i);
+		strcat(delete,vertype);
+		system(delete);
+	
+	}
+
+
+	sprintf(vertype,"%d",ver);
+
+	
+        remove(".Version");
+
+        int fd2=open(".Version", O_CREAT | O_WRONLY, 0777);
+        write(fd2,vertype,strlen(version));
+        write(fd2,"\n",1);
+        close(fd2);
+
+
+        FILE *history=fopen(".History","a");
+        fprintf(history,"Rollback:%s\n",version);
+        fclose(history);
+        chdir("..");
+        chdir("..");
+
+}
+
 
 /*.    create and remove files and directories   .*/
 // have to pass strings to client
@@ -155,24 +206,7 @@ void createdir (char* act)
     
 }
 
-/*void addfile( char* dir, char* act)
-{
-    if (chdir(dir) != 0) { 
-        printf("Cannot open directory"); 
-    }
-    //have to check through manifest
-    int fp=open(".Manifest", O_RDWR | O_CREAT, 0777);
-    while(){// check if file is created or not
-        
-    }
-    //read();
-    close(fp);
-    if(creat(act,0777)<0){
-        printf("Error Creating file");
-    }
-}*/
-
-void deletedir(char* act)
+void deletedir(char* act) //have to lock
 {
    // check if directory is there or not
    char *dirname=act;
@@ -182,31 +216,22 @@ void deletedir(char* act)
    
 }
 
-/*void removefile( char* dir, char* act) //removes when nothing in the folder
-{
-    if (chdir(dir) != 0) { //have to add / in string
-        printf("Cannot open directory"); 
-    }
-    if (remove(act) == 0){ 
-      printf("Deleted successfully");
-      // go to manifest and state how the file is removed
-   }else{
-      printf("Unable to delete the file");
-   }
-    
-}*/
 
 
 /**/
-void rollback(int ver){
-	//looks into manifest and prints out the version
-	
-}
 
-void history(){
-}
-
-void currentversion(){
+void history(char* direc){
+	struct stat st;
+	char *act;
+	sprintf(act,"./.server_por/%s/.History",direc);
+	stat(act, &st);
+	int size = st.st_size;
+	//printf("%d\n",size);
+	write(sock,sprintf("%d",size),20);
+	int fd= open(act,O_RDONLY,0777);
+	char* buf;
+	int re=read(fd,buf,size);
+	write(sock,,size);
 }
 
 void * process(void * ptr) // takes in from client in order to do as commanded
