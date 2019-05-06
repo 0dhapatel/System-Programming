@@ -122,7 +122,9 @@ void createdir (char* act)
 	strcat(dirname,act);
     //clrscr(); 
     int check = mkdir(dirname,0777); 
+	
     // check if directory is created or not 
+	
     if (!check) 
         printf("Directory created\n"); 
     else { 
