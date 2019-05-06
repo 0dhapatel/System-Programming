@@ -307,18 +307,22 @@ void * process(void * ptr) // takes in from client in order to do as commanded
         	// send  name to method
         		direcn=strtok(NULL,":");
         		//printf("direc: %s\n", direcn);
+			createdir(direcn);
     		}else if(strcmp(command,"destroy")==0){
         	// send  name to method
         		direcn=strtok(NULL,":");
         		//printf("direc: %s\n", direcn);
+			deletdir(direcn);
     		}else if(strcmp(command,"currentversion")==0){
         	// send  name to method
         		direcn=strtok(NULL,":");
         		//printf("direc: %s\n", direcn);
+			currentVersion(direcn);
     		}else if(strcmp(command,"history")==0){
         	// send  name to method
         		direcn=strtok(NULL,":");
         		//printf("direc: %s\n", direcn);
+			history(direcn);
     		}else if(strcmp(command,"rollback")==0){
         	// send  name and version to method
         		direcn=strtok(NULL,":");
