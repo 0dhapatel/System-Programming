@@ -231,6 +231,114 @@ void createdir (char* act)
     
 }
 
+void commit(char * dirName){
+	struct stat check;
+	chdir(dirName);
+	int mSize;
+	int fd=open(".Manifest", O_RDONLY);
+	if(stat(".Manifest",&check)==0)
+        	mSize=check.st_size;
+	char *man=(char*)malloc(sizeof(char)*mSize+1);
+	read(fd,man,mSize);
+	*(man+mSize)='\0';
+	close(fd);
+	chdir("..");
+
+	int arraySize=0;
+	int i;
+	for(i=0;i<mSize-1;i++){
+
+        	if(man[i]=='\n'){
+                	arraySize++;
+        	}
+
+	}
+
+	char *version[arraySize];
+	char *fileName[arraySize-1];
+	char *Hashcontent[arraySize-1];
+
+	char* token = strtok(man, " \n");
+	char *temp=(char*)malloc(strlen(token)+1);
+	strcpy(temp,token);
+	version[0]=temp;
+	token=strtok(NULL, " \n");
+	int split=0;
+	int index=0;
+	while (token) {
+        	char *temp=(char*)malloc(strlen(token)+1);
+        	strcpy(temp,token);
+
+        	if(split==0){
+                	version[index+1]=temp;
+                	token = strtok(NULL, " \n");
+                	split++;
+        	}else if(split==1){
+                	fileName[index]=temp;
+                	token = strtok(NULL, " \n");
+                	split++;
+        	}else if(split==2){
+                	Hashcontent[index]=temp;
+                	token = strtok(NULL, " \n");
+                	split=0;
+                	index++;
+        	}
+	}
+	chdir(dirName);
+	remove(".Commit");
+	fd=open(".Commit", O_CREAT | O_WRONLY,0600);
+	
+	int versionNumber=atoi(version[0]);
+	versionNumber++;
+	
+	char newVersion[4];
+	strcpy(newVersion,"");
+	sprintf(newVersion,"%d",versionNumber);
+
+	write(fd, newVersion,strlen(newVersion));
+	write(fd, "\n",1);
+	int k;
+
+	for(k=0;k<arraySize-1;k++){
+	
+		versionNumber=atoi(version[k+1]);
+		versionNumber++;	
+		strcpy(newVersion,"");
+		sprintf(newVersion,"%d",versionNumber);
+	
+		int fSize;
+		char path[50];
+		strcpy(path,fileName[k]);
+		char name[20];
+		strcpy(name,&path[strlen(dirName)+1]);
+	
+		int fd2=open(name,O_RDWR);
+
+		if(stat(name,&check)==0)
+        		fSize=check.st_size;
+		char *file=(char*)malloc(sizeof(char)*fSize+1);
+		read(fd2,file,fSize);
+		*(file+fSize)='\0';
+		close(fd2);
+
+                char *hashCode=(char*)malloc(sizeof(char)*41);
+                hashCode=hash(file);
+        	write(fd,newVersion,strlen(newVersion));
+        	write(fd," ",1);
+
+        	write(fd,fileName[k],strlen(fileName[k]));
+        	write(fd," ",1);
+
+        	write(fd,hash(file),40);
+        	write(fd,"\n",1);
+		
+	}
+
+	write(fd,"\n",1);
+	close(fd);
+	chdir("..");
+}
+
 int main(int argc, char ** argv)
 {
 	int port;
