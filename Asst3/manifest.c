@@ -130,11 +130,9 @@ void manifest_scan(char *projectname, int version)
 		{
 			//add the file version number
 			//add the projectname/path/filename
-			buf = pathname + '/' + path->d_name;
-			write(fp, buf, strlen(buf));
 			//call the hash function
 			//add it to the .manifest
-			buf = "/";
+			buf = manifest_file(pd->d_name);
 			write(fp, buf, strlen(buf));
 		}
 		else if (S_ISDIR(path.st_mode))
