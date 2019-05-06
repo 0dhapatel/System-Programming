@@ -9,7 +9,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <string.h>
-#include "WTF.h
+#include "WTF.h"
 
 /* note to self check if directory is being changed to server_repo properly */
 
