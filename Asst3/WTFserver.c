@@ -118,7 +118,8 @@ void currentVersion(char *dirname)
 void createdir (char* act)
 {
     int dirc;
-    char* dirname = act; 
+    char* dirname = "./.server_repo/"; 
+	strcat(dirname,act);
     //clrscr(); 
     int check = mkdir(dirname,0777); 
     // check if directory is created or not 
@@ -131,6 +132,23 @@ void createdir (char* act)
     if (chdir(dirname) != 0) { //have to add / in string
         	printf("Cannot open directory"); 
     }
+	int fd=open(".Version",O_CREAT | O_WRONLY, 0600);
+        	if(fd==-1){
+                	printf("failed to make version");
+        	}
+        	write(fd,"0",1);
+        	write(fd,"\n",1);
+	        close(fd);
+
+                int fd2=open(".History",O_CREAT | O_WRONLY, 0600);
+                if(fd==-1){
+                        printf("failed to make History");
+                }
+                write(fd2,"create: 0",9);
+                write(fd2,"\n",1);
+                close(fd2);
+	chdir("..");
+		chdir("..");
     
     
 }
