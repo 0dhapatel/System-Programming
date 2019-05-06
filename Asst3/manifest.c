@@ -14,8 +14,24 @@
 	//<file version number><<project name>/path/filename><hash code> (for each file in the project)
 char *manifest_hash(char *line)
 {
-	//given a line of text
-	//return the sha256 hash of the line
+	//given the pathname of the file
+	//return the sha256 hash of the contents of the file
+	int x;
+	char ret[MAXLINE];
+
+    unsigned char digest[SHA256_DIGEST_LENGTH];
+    SHA256_CTX sha256;
+    SHA256_Init(&sha256);
+    SHA256_Update(&sha256, line, strlen(line));
+    SHA256_Final(digest, &sha256);
+
+    for(x = 0; x < SHA256_DIGEST_LENGTH; x++)
+    {
+        //printf("%02x\n", digest[x]);
+        strcat(ret, digest[x]);
+    }
+    return ret;
+    //sgx_exit(NULL);
 }
 char *manifest_file(char *pathname)
 {
