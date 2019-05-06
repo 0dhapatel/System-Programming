@@ -9,6 +9,46 @@
 #include <fcntl.h>
 #include <stdlib.h>
 
+void sendFile(char *name,int sock){
+
+	int nSize=strlen(name);
+	write(sock,&nSize,sizeof(int));
+	write(sock,name,nSize);
+
+	int fSize;
+	struct stat check;
+	int fd=open(name, O_RDONLY);
+	if(stat(name,&check)==0)
+		fSize=check.st_size;
+	char *file=(char*)malloc(fSize+1);
+	read(fd,file,fSize);
+	*(file+fSize)='\0';
+	close(fd);
+
+	write(sock,&fSize,sizeof(int));
+	write(sock,file,fSize);
+	
+
+}
+
+/*.turn file into to hascode  */
+char *hashcode(char *string){
+
+        size_t length = strlen(string);
+	char *output=(char*)malloc(sizeof(40));
+	strcpy(output,"");
+        unsigned char hash[SHA_DIGEST_LENGTH];
+        SHA1(string, length, hash);
+
+        int i;
+	char code[3];	
+        for(i=0;i<SHA_DIGEST_LENGTH;i++){
+               sprintf(code,"%02x",hash[i]);
+		strcat(output,code);
+        }
+	return output;
+}
+
 /* add(a) or remove(r) file  */
 
 void addOrRemoveFile (char *dirName, char *path, char command)
