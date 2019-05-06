@@ -102,7 +102,7 @@ char *manifest_dir(char *pathname)
 	close(PD);
 	return retval;
 }
-void manifest_scan(char *projectname, int version)
+void manifest_generate(char *projectname, int version)
 {
 	//create the manifest file and add the version
 	int fp=open(".Manifest", O_RDWR | O_CREAT, 0777);
