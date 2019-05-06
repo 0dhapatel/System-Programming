@@ -198,8 +198,9 @@ void deletedir(char* act)
 
 
 /**/
-void rollback(char* dir, int ver){
+void rollback(int ver){
 	//looks into manifest and prints out the version
+	
 }
 
 void history(){
@@ -251,6 +252,7 @@ void * process(void * ptr) // takes in from client in order to do as commanded
 		int le1, le2, le3, ver;
 		char* direcn; 
 		char* filen;
+		char* serv="./.server_repo/";
 		
 		/*printf("%d\n",le);
 		printf("%s\n",temp);*/
@@ -296,8 +298,12 @@ void * process(void * ptr) // takes in from client in order to do as commanded
         	// send  name and version to method
         		direcn=strtok(NULL,":");
         		//printf("direc: %s\n", direcn);
+			strcat(act,direc);
+			chdir(act);
         		ver=atoi(strtok(NULL,":"));
         		//printf("verzion: %s\n", filen);
+			rollback(ver);
+			
     		}else{
     			printf("does not go through\n");
     		}
