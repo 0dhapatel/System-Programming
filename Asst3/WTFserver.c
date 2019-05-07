@@ -210,7 +210,51 @@ void deletedir(char* act) //have to lock
    
 }
 
-
+void checkout (char* direcn, int sock)
+{
+    DIR * dir = opendir (direcn);
+  if (dir)
+    {
+      //Directory exists. Send over to the client
+      // gets the most resent version of project
+      int ver=getver(direcn);
+      chdir(".server_repo");
+      chdir(direcn);
+      char* tar;
+      sprintf(tar,"tar cfz %s.tgz %d",direcn, ver);
+      system(tar);
+      char* act;
+      sprintf(act,"%s.tgz");
+      int fd=open(act,O_CREAT|O_RDONLY,0777);
+      
+      int fSize;
+	struct stat check;
+	if(stat(name,&check)==0)
+		fSize=check.st_size;
+	char *file;
+	read(fd,file,fSize);
+	close(fd);
+	write(sock,&fSize,sizeof(int));
+	write(sock,file,fSize);
+    }
+      char* untar;
+      sprintf(untar,"tar xfz %s.tgz %d",direcn, ver);
+      system(untar);
+      chdir("..");
+      chdir("..");
+    }
+  else if (ENOENT == errno)
+    {
+      // Directory does not exist. Goes to server to grab project.
+      write(sock,"No project in server",20);
+    }
+  else
+    {
+      // opendir() failed for some other reason.
+      write(sock,"Server Error",12);
+      exit(0);
+    }
+}
 
 /**/
 
@@ -281,6 +325,7 @@ void * process(void * ptr) // takes in from client in order to do as commanded
         	// send  name to method
         		direcn=strtok(NULL,":");
         		//printf("direc: %s\n", direcn);
+			checkout(direcn);
     		}else if(strcmp(command,"update")==0){
         	// send  name to method
         		direcn=strtok(NULL,":");
@@ -346,9 +391,6 @@ int main(int argc, char ** argv)
 	
    	if (mkdir(".server_repo",0777) !=0) {
         	//printf("Directory not created\n"); 
-    	}
-    	if (chdir(".server_repo") != 0) {
-        	//printf("Cannot open directory"); 
     	}
     	
 	int sock = -1;
