@@ -1,0 +1,51 @@
+Test cases using WTFtest.c
+0. "./WTFtest configure create add check history"
+  This should return without error
+1. "./WTFtest create" or any other command except configure
+  This should return error indicating that configure must first be called
+2. "./WTFtest configure create create" or any other similar duplicating command
+  This should return error indicating that the project could not be created since it is a duplicate project name
+3. "./WTFtest configure remove" or any other similar command removing something which is not there
+  This should return error indicating that the file does not exist in the project
+4. "./WTFtest"
+  This should return error for not enough arguments
+5. "./WTFtest configure" and any additional arguments which are misspelled
+  This should return error for invalid argument
+6. "./WTFtest"
+  This should return error after waiting for too long
+  
+  
+Testcases outside of WTFtest.c
+---------------------------------------------------------
+
+INPUT: ./client configure composite.cs.rutgers.edu 9876
+
+CLIENT OUPUT: configure
+
+---------------------------------------------------------
+
+INPUT: ./client create frog
+
+CLIENT OUTPUT: 	 created
+
+SERVER OUTPUT: frog created
+
+---------------------------------------------------------
+
+INPUT: ./client add frog hop.txt
+
+CLIENT OUTPUT: file added
+
+---------------------------------------------------------
+
+INPUT: ./client add frog test.txt
+
+CLIENT OUTPUT: file added
+
+---------------------------------------------------------
+
+INPUT: ./client remove ironthrone test.txt
+
+CLIENT OUTPUT: file removed
+
+---------------------------------------------------------
