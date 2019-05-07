@@ -484,7 +484,7 @@ int main(int argc, char ** argv)
 			commit(argv[2]);
         		return 0;
         	}else if(strcmp(argv[1], "checkout")){
-			checkout(argv[2]);
+			checkout(argv[2],sock);
         		return 0;
         	}
     	}else if(argc==4){
