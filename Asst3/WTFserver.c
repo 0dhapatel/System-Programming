@@ -343,11 +343,52 @@ void * process(void * ptr) // takes in from client in order to do as commanded
         	// send  name to method
         		direcn=strtok(NULL,":");
         		//printf("direc: %s\n", direcn);
+        		chdir("./.server_repo");
+        		chdir(direcn);
+        		int fSize;
+	struct stat check;
+	int fd=open(".Manifest", O_RDONLY);
+	if(stat(".Manifest",&check)==0)
+		fSize=check.st_size;
+	char *file=(char*)malloc(fSize+1);
+	read(fd,file,fSize);
+	*(file+fSize)='\0';
+	close(fd);
+
+	write(conn->sock,&fSize,sizeof(int));
+	write(conn->sock,file,fSize);
+        		chdir("..");
+        		chdir("..");
         		
     		}else if(strcmp(command,"upgrade")==0){
         	// send  name to method
         		direcn=strtok(NULL,":");
         		//printf("direc: %s\n", direcn);
+        		
+        		
+        		int length;
+		read(conn->sock,&length,sizeof(int));
+		char *path=(char*)malloc((length+1)*sizeof(char));
+		read(conn->sock,path,length);
+			
+		chdir(".server_repo");
+		struct stat check;
+		int size;
+		int fd=open(path, O_RDONLY,0600);
+		if(stat(path,&check)==0)
+			size=check.st_size;
+		char *file=(char*)malloc(sizeof(char)*size+1);
+		read(fd,file,size);
+		*(file+size)='\0';
+		close(fd);	
+
+		write(conn->sock,&size,sizeof(int));
+		write(conn->sock,file,size);	
+
+		chdir("..");
+        		
+        		
+        		
     		}else if(strcmp(command,"push")==0){ // everytime creates new version
         	// send  name to method
         		direcn=strtok(NULL,":");
