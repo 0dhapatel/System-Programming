@@ -201,6 +201,47 @@ void addOrRemoveFile (char *dirName, char *path, char command)
 
 }
 
+void checkout (char* direcn, int sock)
+{
+  // check if directory exists
+  DIR * dir = opendir (direcn);
+  if (dir)
+    {
+      //Directory exists.
+      closedir (dir);
+      printf("Project name already exist\n");
+      exit(0);
+    }
+  else if (ENOENT == errno)
+    {
+      // Directory does not exist. Goes to server to grab project.
+      char* response;
+      sprintf(response,"%s:%s","checkout",direcn);
+      int len=strlen(response);
+      write(sock, &len, sizeof(int));
+	    write(sock, response, len);
+	    char* feedback;
+	    char* tar;
+	    sprintf(tar,"%s.tgz",direcn);
+	    // reads tar file
+	    char* buf;
+	    read(sock, buf, 10);
+      read(sock, feedback, atoi(buf));                                                              
+      int fd=open(tar,O_WRONLY|O_CREAT,0777);
+      int wr=write(fd,feedback,strlen(feedback));
+      char* untar;
+      sprintf("tar -xvf %s",tar);
+      system(untar);
+      close(fd);
+    }
+  else
+    {
+      // opendir() failed for some other reason.
+      printf("Error occured using opendir()");
+      exit(0);
+    }
+}
+
 void deletedir(char* act)
 {
    // check if directory is there or not
@@ -427,6 +468,9 @@ int main(int argc, char ** argv)
         		deletedir(argv[2]);
         	}else if(strcmp(argv[1], "commit")){
 			commit(argv[2]);
+        		return 0;
+        	}else if(strcmp(argv[1], "checkout")){
+			checkout(argv[2]);
         		return 0;
         	}
     	}else if(argc==4){
