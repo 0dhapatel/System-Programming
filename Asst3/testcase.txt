@@ -1,6 +1,7 @@
 Test cases using WTFtest.c
-0. "./WTFtest configure create add check history"
+0. "./WTFtest configure create add checkout history"
   This should return without error
+  The expected output is a .Manifest file in the client's project directory, an added file to the project directory, The  entire project directory returned to the client, and an empty file of the history of pushes
 1. "./WTFtest create" or any other command except configure
   This should return error indicating that configure must first be called
 2. "./WTFtest configure create create" or any other similar duplicating command
@@ -13,6 +14,10 @@ Test cases using WTFtest.c
   This should return error for invalid argument
 6. "./WTFtest"
   This should return error after waiting for too long
+7. "./WTFtest configure create" and create with a new projectname
+  This should return without error
+   The expected output is a .Manifest file in the client's main project directory, a new directory created in the main directory and a .Manifest file in the nested directory
+
   
   
 Testcases outside of WTFtest.c
