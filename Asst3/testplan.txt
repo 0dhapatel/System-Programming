@@ -1,0 +1,39 @@
+Dhaaval Patel and Deanna Miceli
+
+  configure - should create a .configure file that has the IP address and Port#
+    - this should be the very first command to be run, if another command was run before there 
+      should be an error
+
+  create - creates a project in the server_repo and a .Manifest file for the project;
+   should also send a copy back to the client
+
+  add - should add an entry to the file in the project's .Manifest
+
+  remove - should remove the entry of the given file from the .Manifest file
+
+  commit - should produce a .commit file if there are differences in the client and server
+   Manifest.
+
+ push - the client will send the .commit and all files list in the commit to the server.
+
+  add/remove to change the client side then run update - should create a .update file on 
+   client side, the client will also be outputting to STDOUT the differences
+
+  upgrade - Client will apply the changes in the .update file and the .update should be 
+   deleted
+
+ history - should receive a file that contains all pushes done to the project
+
+  current version - client will output all files that the server has under the project and 
+    their version numbers
+
+  rollback - the server will revert its current version to a previous version by deleting 
+    all the more recent versions saved
+
+  destroy - server should delete all files within the project directory and the project 
+    directory itself 
+    
+  sendfile - send the file based on the prefrences: the number of files, file names, size of file, and hash code of file.
+  
+  
+  In order to test, these the WTFtest.c runs the file in order to check if the expected output and actual output match or not.
