@@ -258,7 +258,7 @@ void checkout (char* direcn, int sock)
 
 /**/
 
-void history(char* direc){
+void history(char* direc, int sock){
 	struct stat st;
 	char *act;
 	sprintf(act,"./.server_por/%s/.History",direc);
@@ -325,16 +325,12 @@ void * process(void * ptr) // takes in from client in order to do as commanded
         	// send  name to method
         		direcn=strtok(NULL,":");
         		//printf("direc: %s\n", direcn);
-			checkout(direcn);
+			checkout(direcn,sock);
     		}else if(strcmp(command,"update")==0){
         	// send  name to method
         		direcn=strtok(NULL,":");
         		//printf("direc: %s\n", direcn);
     		}else if(strcmp(command,"upgrade")==0){
-        	// send  name to method
-        		direcn=strtok(NULL,":");
-        		//printf("direc: %s\n", direcn);
-    		}else if(strcmp(command,"commit")==0){
         	// send  name to method
         		direcn=strtok(NULL,":");
         		//printf("direc: %s\n", direcn);
@@ -361,7 +357,7 @@ void * process(void * ptr) // takes in from client in order to do as commanded
         	// send  name to method
         		direcn=strtok(NULL,":");
         		//printf("direc: %s\n", direcn);
-			history(direcn);
+			history(direcn,sock);
     		}else if(strcmp(command,"rollback")==0){
         	// send  name and version to method
         		direcn=strtok(NULL,":");
@@ -461,20 +457,3 @@ int main(int argc, char ** argv)
 	
 	return 0;
 }
-
-
-
-
-/*else if(strcmp(command,"add")==0){
-        	// send  name and file to method
-        		direcn=strtok(NULL,":");
-        		//printf("direc: %s\n", direcn);
-        		filen=strtok(NULL,":");
-        		//printf("file: %s\n", filen);
-    		}else if(strcmp(command,"remove")==0){
-        	// send  name and file to method
-        		direcn=strtok(NULL,":");
-        		//printf("direc: %s\n", direcn);
-        		filen=strtok(NULL,":");
-        		//printf("file: %s\n", filen);
-    		}*/
