@@ -484,8 +484,11 @@ int main(int argc, char ** argv)
 			commit(argv[2]);
         		return 0;
         	}else if(strcmp(argv[1], "checkout")){
+			len = strlen(response);
+			write(sock, &len, sizeof(int));
+			write(sock, response, len);
 			checkout(argv[2],sock);
-        		return 0;
+			return 0;
         	}
     	}else if(argc==4){
         	// send server name and file
@@ -505,10 +508,10 @@ int main(int argc, char ** argv)
     	}
 
 	/* send text to server */
-		 
-		len = strlen(response);
-		write(sock, &len, sizeof(int));
-		write(sock, response, len);
+		 len = strlen(response);
+			write(sock, &len, sizeof(int));
+			write(sock, response, len);
+		
 		
 	/* read server to client */
 	// based on what argv[1] is
