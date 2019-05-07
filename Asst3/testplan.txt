@@ -36,4 +36,5 @@ Dhaaval Patel and Deanna Miceli
   sendfile - send the file based on the prefrences: the number of files, file names, size of file, and hash code of file.
   
   
-To use WTFtest.c, run the program with the commands you want to execute as arguments. An example of a code that would work correctly is "./WTFtest configure create add check history". WTFtest.c forks a child process to run the client WTF.c by using execl(), while the parents runs the WTFserver.c. The child process has dummy project names and filenames which it will use as arguments for execl(). If you would like to test with a specific file, rename the file to "a_file_1.txt" and the child process will use it when it calls execl().
+To use WTFtest.c, run the program with the commands you want to execute as arguments. An example of commands that would work correctly is "./WTFtest configure create add check history". An example of commands that would work incorrectly is "./WTFtest create". 
+WTFtest.c forks a child process to run the client WTF.c by using execl(), while the parents runs the WTFserver.c. The child process has dummy project names and filenames which it will use as arguments for execl(). If you would like to test with a specific file, rename the file to "a_file_1.txt" and the child process will use it when it calls execl().
