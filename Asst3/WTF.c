@@ -691,10 +691,7 @@ int main(int argc, char ** argv)
 	close(fd);
 	
 	bzero(response,1024);
-	if(strcmp(argv[1],"sendfile")==0){
-        	// send server file
-        	sprintf(response,"%s:%s",argv[1],argv[2]);
-    	}else if(argc==3){
+	if(argc==3){
         	// send server name
         	sprintf(response,"%s:%s",argv[1],argv[2]);
         	if(strcmp(argv[1], "create")){
