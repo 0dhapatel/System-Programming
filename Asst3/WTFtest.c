@@ -28,7 +28,12 @@ int main()
     int i = 1;
     //create a new child process
 	int pid = fork();
-	if (pid == 0)
+	if(pid < 0) 
+	{ 
+		write(STDERR, "Error from fork()\n", 18);
+		return 0;
+	}
+	else if (pid == 0)
 	{
 		//child should exec to the client process with the IP address and a random port number
 		printf("CHILD:\tpid: %i\tparent pid: %i\n", getpid(), getppid());
@@ -63,10 +68,19 @@ int main()
 	else
 	{
 		printf("PARENT:\tpid: %i\tchild pid: %i\n", getpid(), pid);
-		
-		while((wait(&status)) > 0);
-		// waitpid(pid, &status, 0);
-		
+
+		while((wait(&status)) > 0)
+		{ //while we are waiting for the child to finish, we will run the server to listen for it's requests
+
+			//execute the server program to establish a connection for the client
+			execl("WTFserver.c", port);
+			while( (ret < 0)&&(ret < 1024))
+			{ //error, try again with a new port number
+				port = (*port + 1);
+				ret = execl("/WTFserver.c", port);
+			}
+		}
+
 		printf("PARENT:\tChild has ended.\n");	
 
 	}
