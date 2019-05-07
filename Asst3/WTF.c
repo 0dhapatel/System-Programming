@@ -245,10 +245,22 @@ void checkout (char* direcn, int sock)
 void deletedir(char* act)
 {
    // check if directory is there or not
-   char *dirname=act;
-   char* in;
-   sprintf(in,"rm -r %s",dirname);
-   system(in);
+  
+	
+	DIR* dir = opendir("mydir");
+	if (dir)
+	{
+    	/* Directory exists. */
+    		closedir(dir);
+		 char *dirname=act;
+   		char* in;
+   		sprintf(in,"rm -r %s",dirname);
+   		system(in);
+	}
+	else
+	{
+   	// error
+	}
    
 }
 
