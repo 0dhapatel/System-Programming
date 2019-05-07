@@ -637,6 +637,7 @@ int main(int argc, char ** argv)
 	int fd=open("./.configure",O_RDONLY,0777);
 	if(strcmp(argv[1],"configure")==0){
 		//int hi=creat("configure.txt",0777);
+		remove("./.configure");
 		fd=open("./.configure", O_WRONLY|O_CREAT,0777);
         	ssize_t w1=write(fd, argv[2], strlen(argv[2]));
         	ssize_t w2=write(fd, "\n", 1);
@@ -742,6 +743,52 @@ int main(int argc, char ** argv)
 		read(sock, resp, atoi(files));
 		printf("%s\n",resp);
 		return 0;
+	}else if (strcmp(argv[1], "upgrade")==0){
+	
+	if(open(".Update",O_RDONLY)==-1){
+	printf("Update first");
+	exit(1);}
+	
+	DIR* dir =opendir(argv[2]);
+        if(!dir){
+                closedir(dir);
+                printf("The project doesn't exist\n");
+                exit(1);
+
+        }
+         
+
+               	int length;
+		read(sock,&length,sizeof(int));
+
+        int i;
+        for(i=0;i<length;i++){
+                int nSize;
+                read(sock,&nSize,sizeof(int));
+                char *path=(char*)malloc((nSize+1));
+                read(sock,path,nSize);
+		*(path+nSize)='\0';
+
+                int fSize;
+                read(sock,&fSize,sizeof(int));
+                char *file=(char*)malloc(fSize+1);
+                read(sock,file,fSize);
+		*(file+fSize)='\0';
+		
+		char dir[50];
+		strcpy(dir,argv[2]);
+		strcat(dir,"/");   
+		strcat(dir,path);
+		
+                remove(dir);
+                int fd=open(dir, O_CREAT | O_WRONLY, 0600);
+                if(fd==-1){ printf("failed to create file");}
+                write(fd,file,fSize);
+                close(fd);
+                }
+	
+	
+	
 	}else if(strcmp(argv[1], "push")==0){
 		 DIR * dir = opendir (argv[1]);
   		if (dir)
