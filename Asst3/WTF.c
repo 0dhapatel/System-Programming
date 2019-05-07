@@ -9,6 +9,8 @@
 #include <fcntl.h>
 #include <stdlib.h>
 #include <openssl/sha.h>
+#include <dirent.h>
+#include <errno.h>
 
 void sendFile(char *name,int sock){
 
