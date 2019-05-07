@@ -9,7 +9,17 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <string.h>
-#include "WTF.h"
+#include <dirent.h>
+#include <string.h>
+#include <errno.h>
+//#include "WTF.h"
+
+typedef struct
+{
+	int sock;
+	struct sockaddr address;
+	int addr_len;
+} connection_t;
 
 /* note to self check if directory is being changed to server_repo properly */
 
@@ -18,12 +28,12 @@ int getver(char *name)
  	struct dirent *drct;
     DIR *direc = opendir(name);
 	int latest = 0;
-	if (direc == -1)
+	if (direc == NULL)
   {
-	write(STDERR, "project does not exist\n", 23);
+	printf("project does not exist\n");
 	return -1;
   }
-	while ((drct = readdir(direc)) != -1)
+	while ((drct = readdir(direc)) != NULL)
         {
   		if (latest < atoi(drct->d_name))
 		{
@@ -40,9 +50,9 @@ void currentVersion(char *dirname)
 	char dire[100];
 	snprintf(dire, sizeof(dire), "./.%s/%s", "server_repo", dirname);
         DIR *direc = opendir(dire);
-	if (direc == -1)
+	if (direc == NULL)
         {
-		write(STDERR, "project does not exist\n", 23);
+		printf("project does not exist\n");
 		return;
         }
 	printf("%s\n", dirname);
@@ -124,13 +134,13 @@ void rollback(int ver){
 
 	char delete[15];
 
-	char vertypr[4];
+	char vertype[4];
 	strcpy(vertype,"");
 
 	int i;
 	for(i=old;i>ver;i--){
 		strcpy(delete,"rm -r version");
-		sprintf(vertypr,"%d",i);
+		sprintf(vertype,"%d",i);
 		strcat(delete,vertype);
 		system(delete);
 	
@@ -143,13 +153,13 @@ void rollback(int ver){
         remove(".Version");
 
         int fd2=open(".Version", O_CREAT | O_WRONLY, 0777);
-        write(fd2,vertype,strlen(version));
+        write(fd2,vertype,strlen(vertype));
         write(fd2,"\n",1);
         close(fd2);
 
 
         FILE *history=fopen(".History","a");
-        fprintf(history,"Rollback:%s\n",version);
+        fprintf(history,"Rollback:%s\n",vertype);
         fclose(history);
         chdir("..");
         chdir("..");
@@ -203,10 +213,12 @@ void createdir (char* act)
 void deletedir(char* act) //have to lock
 {
    // check if directory is there or not
+   chdir(".server_repo");
    char *dirname=act;
    char* in;
    sprintf(in,"rm -r %s",dirname);
    system(in);
+   chdir("..");
    
 }
 
@@ -229,14 +241,13 @@ void checkout (char* direcn, int sock)
       
       int fSize;
 	struct stat check;
-	if(stat(name,&check)==0)
+	if(stat(act,&check)==0)
 		fSize=check.st_size;
 	char *file;
 	read(fd,file,fSize);
 	close(fd);
 	write(sock,&fSize,sizeof(int));
 	write(sock,file,fSize);
-    }
       char* untar;
       sprintf(untar,"tar xfz %s.tgz %d",direcn, ver);
       system(untar);
@@ -265,11 +276,13 @@ void history(char* direc, int sock){
 	stat(act, &st);
 	int size = st.st_size;
 	//printf("%d\n",size);
-	write(sock,sprintf("%d",size),20);
+	char *in;
+	sprintf(in,"%d",size);
+	write(sock,in,20);
 	int fd= open(act,O_RDONLY,0777);
 	char* buf;
 	int re=read(fd,buf,size);
-	write(sock,,size);
+	write(sock,buf,size);
 }
 
 void * process(void * ptr) // takes in from client in order to do as commanded
@@ -325,11 +338,12 @@ void * process(void * ptr) // takes in from client in order to do as commanded
         	// send  name to method
         		direcn=strtok(NULL,":");
         		//printf("direc: %s\n", direcn);
-			checkout(direcn,sock);
+			checkout(direcn,conn->sock);
     		}else if(strcmp(command,"update")==0){
         	// send  name to method
         		direcn=strtok(NULL,":");
         		//printf("direc: %s\n", direcn);
+        		
     		}else if(strcmp(command,"upgrade")==0){
         	// send  name to method
         		direcn=strtok(NULL,":");
@@ -338,6 +352,110 @@ void * process(void * ptr) // takes in from client in order to do as commanded
         	// send  name to method
         		direcn=strtok(NULL,":");
         		//printf("direc: %s\n", direcn);
+        		struct stat check;
+	int vSize;
+        		
+        		DIR * dir = opendir (direcn);
+  if (dir)
+    {
+      //Directory exists.
+      closedir (dir);
+      chdir("./.server");
+      chdir(direcn);
+      int ver=getver(direcn)+1;
+      char* feedback;
+	    char* tar;
+	    sprintf(tar,"%s.tgz",direcn);
+	    // reads tar file
+	    char* buf;
+	    read(conn->sock, buf, 10);
+      read(conn->sock, feedback, atoi(buf));                                                              
+      int fd=open(tar,O_WRONLY|O_CREAT,0777);
+      int wr=write(fd,feedback,strlen(feedback));
+      char* untar;
+      sprintf("tar -xvf %s.tgz %d",tar,ver);
+      system(untar);
+      close(fd);
+      
+       fd=open(".Version", O_RDONLY);
+	if(stat(".Version",&check)==0)
+		 vSize=check.st_size;
+	char *vers=(char*)malloc(sizeof(char)*vSize+1);
+	read(fd,vers,vSize);
+	*(vers+vSize)='\0';
+	close(fd);
+
+	
+      char *newVersion;
+	sprintf(newVersion,"%d",ver);
+
+	remove(".Version");
+
+	int fd2=open(".Version", O_CREAT | O_WRONLY, 0600);
+	write(fd2,newVersion,strlen(newVersion));
+	write(fd2,"\n",1);
+	close(fd2);
+
+	FILE *history=fopen(".History","a");
+	fprintf(history,"push:%s\n",newVersion);
+	fclose(history);
+
+      chdir("..");
+      chdir("..");
+    }
+  else if (ENOENT == errno)
+    {
+      // Directory does not exist. Goes to client to grab project.
+      createdir(direcn);
+      chdir("./.server");
+      chdir(direcn);
+	    char* feedback;
+	    char* tar;
+	    sprintf(tar,"%s.tgz",direcn);
+	    // reads tar file
+	    char* buf;
+	    read(conn->sock, buf, 10);
+      read(conn->sock, feedback, atoi(buf));                                                              
+      int fd=open(tar,O_WRONLY|O_CREAT,0777);
+      int wr=write(fd,feedback,strlen(feedback));
+      char* untar;
+      sprintf("tar -xvf %s.tgz 1",tar);
+      system(untar);
+      close(fd);
+      fd=open(".Version", O_RDONLY);
+	if(stat(".Version",&check)==0)
+		vSize=check.st_size;
+	char *vers=(char*)malloc(sizeof(char)*vSize+1);
+	read(fd,vers,vSize);
+	*(vers+vSize)='\0';
+	close(fd);
+
+	
+      char *newVersion;
+	sprintf(newVersion,"%d",ver);
+
+	remove(".Version");
+
+	int fd2=open(".Version", O_CREAT | O_WRONLY, 0600);
+	write(fd2,newVersion,strlen(newVersion));
+	write(fd2,"\n",1);
+	close(fd2);
+
+	FILE *history=fopen(".History","a");
+	fprintf(history,"push:%s\n",newVersion);
+	fclose(history);
+	chdir("..");
+      chdir("..");
+    }
+  else
+    {
+      // opendir() failed for some other reason.
+      printf("Error occured using opendir()");
+      exit(0);
+    }
+        		
+        		
+        		
     		}else if(strcmp(command,"create")==0){
         	// send  name to method
         		direcn=strtok(NULL,":");
@@ -347,7 +465,7 @@ void * process(void * ptr) // takes in from client in order to do as commanded
         	// send  name to method
         		direcn=strtok(NULL,":");
         		//printf("direc: %s\n", direcn);
-			deletdir(direcn);
+			deletedir(direcn);
     		}else if(strcmp(command,"currentversion")==0){
         	// send  name to method
         		direcn=strtok(NULL,":");
@@ -357,13 +475,13 @@ void * process(void * ptr) // takes in from client in order to do as commanded
         	// send  name to method
         		direcn=strtok(NULL,":");
         		//printf("direc: %s\n", direcn);
-			history(direcn,sock);
+			history(direcn,conn->sock);
     		}else if(strcmp(command,"rollback")==0){
         	// send  name and version to method
         		direcn=strtok(NULL,":");
         		//printf("direc: %s\n", direcn);
-			strcat(act,direc);
-			chdir(act);
+			strcat(serv,direcn);
+			chdir(serv);
         		ver=atoi(strtok(NULL,":"));
         		//printf("verzion: %s\n", filen);
 			rollback(ver);
