@@ -11,3 +11,29 @@ even if that return was caused by an uncaught exception.
 Synchronized Statement: Declares a block of code to be synchronized. Unlike synchronized methods, synchronized statements 
 should specify the objects that provide the intrinsic lock. These statements are useful for improving concurrency with 
 fine-grained synchronization, as they enable the avoidance of unnecessary blocking.
+
+WTF.c
+A version control system for a file directory, managed by client and server processes. 
+
+IMPLEMENTATION
+The main function in WTF.c begins by error checking the given arguments and creating a configure file if it is the first time a client is sending the server information.
+The configure file is opened and the information is used to create the socket descriptor using socket(), and indicating AF_INET for the internet, SOCK_STREAM because the socket will be an endpoint for an internet connection, and IPPROTO_TCP for the TCP type of protocol.
+The new socket is then connected to the server with connect(). The client sends the necessary arguments to the server, depending on the number of arguments. The client also calls the corresponding functions to manage the client side of the project depending on the command that is given in the arguments passed to the client.
+
+Meanwhile, the server process’ main function error checks the directory and command line arguments, and similarly creates a socket. The difference between the server and client sockets is that the server socket now calls bind() to give the new server socket an address for the client to connect to. The server calls listen() so that the socket becomes a listening socket with backlog of 1000, because we want the kernel to queue a large number of outstanding connection requests. Finally the server calls accept() in a while loop to continuously wait for connection requests from a client. Connection_t is used for the accept() function to allow us to create a new thread or free the connection_t. A new thread is created every time we accept a client connection with pthread_create() which then takes the function process() as an argument. 
+
+The new thread is sent to process() which error checks the thread and then reads the thread’s message. Depending on the command given to the thread, the corresponding method will handle each command. After the command’s method returns, the connection is closed and freed with close() and free(), and the thread is terminated with pthread_exit().
+
+Back in WTF.c,  the client also cleans up by closing the socket and freeing any allocated memory with close() and free().
+
+DESIGN
+To improve the modularity and readability of the code, certain repeating tasks as well as commands for repository services had their own functions. 
+sendFile() opens a file, reads and stores the contents, and then writes the contents to the socket.
+hashcode() computes the sha1 hash of a given string and returns the hash. This function requires the specific openssl/sha.h file and will not work on certain systems without first importing the library. 
+deleteDir(), createDir() add or remove directories from the client side while deletedir() and createdir() add or remove directories from the server repository.
+getver() determines if the project exists, and if it does it returns the latest version number
+
+
+CHALLENGES
+Concurrent servers based on threads are tricky to work with because you have to be careful to avoid coding pitfalls. An advantage to using threads is also a disadvantage—threads share global and heap variables which makes it easier to share information also makes it easier to share data unintentionally.
+One instance of this is when calling accept() and pthread_create()
