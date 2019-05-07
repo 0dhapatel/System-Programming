@@ -38,3 +38,20 @@ Dhaaval Patel and Deanna Miceli
   
 To use WTFtest.c, run the program with the commands you want to execute as arguments. An example of commands that would work correctly is "./WTFtest configure create add check history". An example of commands that would work incorrectly is "./WTFtest create". 
 WTFtest.c forks a child process to run the client WTF.c by using execl(), while the parents runs the WTFserver.c. The child process has dummy project names and filenames which it will use as arguments for execl(). If you would like to test with a specific file, rename the file to "a_file_1.txt" and the child process will use it when it calls execl().
+
+
+Test cases using WTFtest.c
+0. "./WTFtest configure create add check history"
+  This should return without error
+1. "./WTFtest create" or any other command except configure
+  This should return error indicating that configure must first be called
+2. "./WTFtest configure create create" or any other similar duplicating command
+  This should return error indicating that the project could not be created since it is a duplicate project name
+3. "./WTFtest configure remove" or any other similar command removing something which is not there
+  This should return error indicating that the file does not exist in the project
+4. "./WTFtest"
+  This should return error for not enough arguments
+5. "./WTFtest configure" and any additional arguments which are misspelled
+  This should return error for invalid argument
+6. "./WTFtest"
+  This should return error after waiting for too long
