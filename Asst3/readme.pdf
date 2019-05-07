@@ -1,19 +1,10 @@
-// what should be included:
-//documenting your design paying particular attention to the thread synchronization requirements of your application.
-
-Thread synchronization is the concurrent execution of two or more threads that share critical resources. Threads should be 
-synchronized to avoid critical resource use conflicts. Otherwise, conflicts may arise when parallel-running threads attempt 
-to modify a common variable at the same time.  two synchronization strategies are used to prevent thread interference and 
-memory consistency errors: 
-Synchronized Method: Includes the synchronized keyword in its declaration. When a thread invokes a synchronized method, 
-synchronized method automatically acquires the intrinsic lock for that method's object and releases it when the method returns,
-even if that return was caused by an uncaught exception.
-Synchronized Statement: Declares a block of code to be synchronized. Unlike synchronized methods, synchronized statements 
-should specify the objects that provide the intrinsic lock. These statements are useful for improving concurrency with 
-fine-grained synchronization, as they enable the avoidance of unnecessary blocking.
+Dhaval Patel & Deanna Miceli
+CS214: Where's The File?
+6 May 2019
 
 WTF.c
-A version control system for a file directory, managed by client and server processes. 
+A version control system for a project file directory, managed by client and server processes. The system should support multiple client connections and utilize threads, which have less runtime overhead than processes and allow heap and global variable data sharing.
+
 
 IMPLEMENTATION
 The main function in WTF.c begins by error checking the given arguments and creating a configure file if it is the first time a client is sending the server information.
@@ -36,3 +27,10 @@ getver() determines if the project exists, and if it does it returns the latest 
 
 CHALLENGES
 Concurrent servers based on threads are tricky to work with because you have to be careful to avoid coding pitfalls. An advantage to using threads is also a disadvantage—threads share global and heap variables which makes it easier to share information, but also makes it easier to share data unintentionally. One instance of this is when calling accept() and pthread_create(), we must assign each connected descriptor returned by accept() to its own memory block. Later, we detach the thread so that the memory can be reclaimed when it terminates, thus avoiding memory leaks. 
+
+Two synchronization strategies are used to prevent thread interference and memory consistency errors: 
+Synchronized Method: Includes the synchronized keyword in its declaration. When a thread invokes a synchronized method, 
+synchronized method automatically acquires the intrinsic lock for that method's object and releases it when the method returns,even if that return was caused by an uncaught exception.
+Synchronized Statement: Declares a block of code to be synchronized. Unlike synchronized methods, synchronized statements 
+should specify the objects that provide the intrinsic lock. These statements are useful for improving concurrency with 
+fine-grained synchronization, as they enable the avoidance of unnecessary blocking.
