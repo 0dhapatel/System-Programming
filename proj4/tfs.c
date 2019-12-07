@@ -153,28 +153,84 @@ int dir_find(uint16_t ino, const char *fname, size_t name_len, struct dirent *di
 int dir_add(struct inode dir_inode, uint16_t f_ino, const char *fname, size_t name_len) {
 
 	// Step 1: Read dir_inode's data block and check each directory entry of dir_inode
+	int block, direc;
+	struct dirent* diren;
+	diren = malloc(BLOCK_SIZE);
+	struct dirent* dirn;
+	dirn = malloc(sizeof(struct dirent));
 	
 	// Step 2: Check if fname (directory name) is already used in other entries
-
+	if (dir_find(dir_inode.ino, fname, name_len, dirn) != 0) {
+		// add failed
+		return 0;
+	} else {
+		dirn->ino = f_ino;
+		dirn->valid = 1;
+		strncpy(dirn->name, fname, sizeof(dirn->name));
+		dirn->name[name_len] = '\0';
+		for (block = 0; block < 16; block++) {
+		
 	// Step 3: Add directory entry in dir_inode's data block and write to disk
-
+			if (dir_inode.direct_ptr[block] == 0) {
+				dir_inode.direct_ptr[block] = get_avail_blkno();
+				writei(dir_inode.ino, &dir_inode);
+				bio_write(dir_inode.direct_ptr[block], dirn);
+				//add success
+				return 1;
+				
 	// Allocate a new data block for this directory if it does not exist
-
+			} else {
+				bio_read(dir_inode.direct_ptr[block], diren);
+				for (direc = 0; direc < 16; direc++) {
+					if (diren[direc].valid == 0) {
+						memcpy(&diren[direc], dirn, sizeof(struct dirent));
+						bio_write(dir_inode.direct_ptr[block], diren);
+						dir_inode.link++;
+						writei(dir_inode.ino, &dir_inode);
+						//add success
+						return 1;
+					}
+				}
+			}
+		}
+	}
 	// Update directory inode
 
 	// Write directory entry
-
+	
+	//add failed
 	return 0;
 }
 
 int dir_remove(struct inode dir_inode, const char *fname, size_t name_len) {
 
 	// Step 1: Read dir_inode's data block and checks each directory entry of dir_inode
+	int block, direc;
+	struct dirent* diren;
+	struct dirent* dirn;
+	dirn = malloc(sizeof(struct dirent));
 	
 	// Step 2: Check if fname exist
-
+	if ((block = dir_find(dir_inode.ino, fname, name_len, dirn)) != 0) {
+		diren = malloc(BLOCK_SIZE);
+		bio_read(block, diren);
+		for (direc = 0; direc < 16; direc++) {
+			if (diren[direc].valid == 1) {
+			
 	// Step 3: If exist, then remove it from dir_inode's data block and write to disk
-
+				if (strcmp(diren[direc].name, fname) == 0) {
+					diren[direc].valid = 0;
+					bio_write(block, diren);
+					//remove success
+					free(dirn);
+					free(diren);
+					return 1;
+				}
+			}
+		}
+	}
+	//remove failed
+	free(dirn);
 	return 0;
 }
 
