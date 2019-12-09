@@ -29,7 +29,7 @@
 char diskfile_path[PATH_MAX];
 
 // Declare your in-memory data structures here
-struct suberblock sb;
+struct superblock sb;
 //struct inode in;
 //struct dirent dir;
 
@@ -95,7 +95,7 @@ int readi(uint16_t ino, struct inode *inode) {
   //bio_read(blockNum, buf);
   struct inode *temp = malloc(sizeof(struct inode));
   bio_read(blockNum, temp);
-  mempy(inode, &temp[offset], sizeof(struct inode));
+  memcpy(inode, &temp[offset], sizeof(struct inode));
 	
 	return 0;
 }
@@ -111,7 +111,7 @@ int writei(uint16_t ino, struct inode *inode) {
 	// Step 3: Write inode to disk 
 	struct inode *temp = malloc(sizeof(struct inode));
 	bio_read(blockNum, temp);
-	mempy(inode, &temp[offset], sizeof(struct inode));
+	memcpy(inode, &temp[offset], sizeof(struct inode));
 	bio_write(blockNum, temp);
 
 	return 0;
@@ -136,10 +136,10 @@ int dir_find(uint16_t ino, const char *fname, size_t name_len, struct dirent *di
   		bio_read(inode->direct_ptr[block], dirn);
   //If the name matches, then copy directory entry to dirent structure
   		for(dirc=0; dirc<16; dirc++){
-  			if(dern[dirc].valid==1){
+  			if(dirn[dirc].valid==1){
   				if(strcmp(fname, dirn[dirc].name)==0){
   					memcpy(dirent, &dirn[dirc], sizeof(struct dirent));
-  					return inode->direct_ptr[block]
+  					return inode->direct_ptr[block];
   				}
   			}
   		}
@@ -267,9 +267,9 @@ int tfs_mkfs() {
 	dev_init(diskfile_path);
 
 	// write superblock information
-	sb->magic_num = MAGIC_NUM;
-	sb->max_inum = MAX_INUM;
-	sb->max_dnum = MAX_DNUM;
+	sb.magic_num = MAGIC_NUM;
+	sb.max_inum = MAX_INUM;
+	sb.max_dnum = MAX_DNUM;
 	
 	char *buff= malloc(BLOCK_SIZE*sizeof(char));
 	memcpy(buff, &sb, sizeof(sb));
@@ -278,15 +278,15 @@ int tfs_mkfs() {
 	// initialize inode bitmap
 	unsigned char inoMap = malloc (sizeof(unsigned char)*MAX_INUM / 8);
 	memset(inoMap, 0, MAX_INUM / 8);
-	sb->i_bitmap_blk = 1;
-	sb->i_start_blk = 3;
+	sb.i_bitmap_blk = 1;
+	sb.i_start_blk = 3;
 
 	// initialize data block bitmap
 	unsigned char dataMap = malloc (sizeof(unsigned char)*MAX_DNUM / 8);
 	memset(dataMap, 0, MAX_DNUM / 8);
 	bio_write(2, dataMap);
-	sb->d_bitmap_blk = 2;
-	sb->d_start_blk = 67;
+	sb.d_bitmap_blk = 2;
+	sb.d_start_blk = 67;
 
 	// update bitmap information for root directory
 	set_bitmap((bitmap_t)inoMap, 0);
