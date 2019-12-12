@@ -447,8 +447,46 @@ static int tfs_readdir(const char *path, void *buffer, fuse_fill_dir_t filler, o
 	} while(blocknum < 16);
 	return 0;
 }
-
-
+char *basename(const char *path)
+{
+	char *base = malloc(MAX_DIRNAME);
+	char *reset = "\0";
+	int strln = strlen(path), i = 0;
+	while(i < strln)
+	{
+		if((path[i] == '/')&&(i < (strln - 2)) )
+		{
+			strncpy(reset, base, MAX_DIRNAME);
+		}
+		strcat(base, path[i], 1);
+		i++;
+	}
+	return base;
+}
+char *dirname(const char *path)
+{
+	int strln = strlen(path);
+	char *dirpath = malloc(strln);
+	char *base = malloc(MAX_DIRNAME);
+	char *reset = "\0";
+	int i = 0;
+	while(i < strln)
+	{
+		if((path[i] == '/')&&(i < (strln - 2)) )
+		{
+			strncpy(base, dirpath, strlen(base));
+			strncpy(reset, base, MAX_DIRNAME);
+			strcat(dirpath, path[i], 1);
+		}
+		else if(i == (strln - 1) )
+		{
+			free(base);
+			return dirpath;
+		}
+		strcat(dirpath, path[i], 1);
+		i++;
+	}
+}
 static int tfs_mkdir(const char *path, mode_t mode) {
 
 	// Step 1: Use dirname() and basename() to separate parent directory path and target directory name
