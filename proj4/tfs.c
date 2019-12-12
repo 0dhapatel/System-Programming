@@ -431,16 +431,20 @@ static int tfs_readdir(const char *path, void *buffer, fuse_fill_dir_t filler, o
 		printf("error returned in get_node_by_path\n");
 		return -2;
 	}
-	struct dirent *dire =  malloc(sizeof(struct dirent));
-	void *block = malloc(sizeof(unsigned char)*BLOCK_SIZE);
-	bio_read(node->ino, block);
+	struct dirent *dire =  malloc(BLOCK_SIZE);
+	void *block = malloc(BLOCK_SIZE);
 	int blocknum = 0;
 	// Step 2: Read directory entries from its data blocks, and copy them to filler
 	int ret2;
 	do
 	{
-		if(ret2 = filler(buffer, dire->name, NULL, 0) != 0) { return 0; }
-	} while()
+		if(node->direct_ptr[blocknum] != 0)
+		{
+			bio_read(node->direct_ptr[blocknum], dire);
+			if(ret2 = filler(buffer, dire->name, NULL, 0) != 0) { return 0; }
+			blocknum++;
+		}
+	} while(blocknum < 16);
 	return 0;
 }
 
