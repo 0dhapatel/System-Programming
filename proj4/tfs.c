@@ -490,7 +490,7 @@ char *dirname(const char *path)
 }*/
 static int tfs_mkdir(const char *path, mode_t mode) {
 
-	// Step 1: Use dirname() and basename() to separate parent directory path and target directory name
+// Step 1: Use dirname() and basename() to separate parent directory path and target directory name
 	char *base = basename(strdup(path));
 	char *dirpath = dirname(strdup(path));
 	// Step 2: Call get_node_by_path() to get inode of parent directory
@@ -516,9 +516,18 @@ static int tfs_mkdir(const char *path, mode_t mode) {
 		return -2;
 	}
 	// Step 5: Update inode for target directory
-
+	struct inode new;
+	new.ino = inum;
+	new.valid = 1;
+	new.size = 0;
+	new.type = 1;
+	new.link = 2;
+	memset(new.direct_ptr, 0, 16*sizeof(int));
+	memset(new.indirect_ptr, 0, 8*sizeof(int));
+	new.vstat.st_mtime = time(0);
+	new.vstat.st_atime = time(0);
 	// Step 6: Call writei() to write inode to disk
-
+	writei(new.ino, &new);
 
 	return 0;
 }
