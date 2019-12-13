@@ -516,7 +516,12 @@ static int tfs_mkdir(const char *path, mode_t mode) {
 		return -2;
 	}
 	// Step 5: Update inode for target directory
-	struct inode *new;
+	struct inode *new = malloc(sizeof(struct inode));
+	if(new == NULL)
+	{
+		perror("error allocating inode");
+		exit(0);
+	}
 	new->ino = (uint16_t)inum;
 	new->valid = 1;
 	new->size = 0;
