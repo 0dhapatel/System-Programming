@@ -26,6 +26,7 @@
 #include "block.h"
 #include "tfs.h"
 
+#define MAX_DIRNAME 100
 char diskfile_path[PATH_MAX];
 
 // Declare your in-memory data structures here
