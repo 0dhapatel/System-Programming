@@ -509,7 +509,7 @@ static int tfs_mkdir(const char *path, mode_t mode) {
 	// Step 3: Call get_avail_ino() to get an available inode number
 	int inum = get_avail_ino();
 	// Step 4: Call dir_add() to add directory entry of target directory to parent directory
-	ret = dir_add(node, inum, base, strlen(base));
+	ret = dir_add(*node, (uint16_t)inum, base, strlen(base));
 	if(ret < 1)
 	{
 		printf("error in dir_add\n");
