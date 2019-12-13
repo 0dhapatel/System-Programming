@@ -48,7 +48,7 @@ int get_avail_ino() {
 	while(get_bitmap((bitmap_t)buf, i)){
 		i++;
 		// NEW
-		if(i > max_inum) return -1;
+		if(i > MAX_INUM) return -1;
 	}
 
 	// Step 3: Update inode bitmap and write to disk
@@ -75,7 +75,7 @@ int get_avail_blkno() {
 	while(get_bitmap((bitmap_t)buf, i)){
 		i++;
 		// NEW
-		if(i > max_dnum) return -1;
+		if(i > MAX_DNUM) return -1;
 	}
 
 	// Step 3: Update data block bitmap and write to disk
