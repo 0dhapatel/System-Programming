@@ -679,13 +679,48 @@ static int tfs_read(const char *path, char *buffer, size_t size, off_t offset, s
 
 static int tfs_write(const char *path, const char *buffer, size_t size, off_t offset, struct fuse_file_info *fi) {
 	// Step 1: You could call get_node_by_path() to get inode from path
-
+	struct inode* in = malloc(sizeof(struct inode));
+	get_node_by_path(path, 0, in);
+	void* tmp = malloc(BLOCK_SIZE);
+	
 	// Step 2: Based on size and offset, read its data blocks from disk
-
+	
 	// Step 3: Write the correct amount of data from offset to disk
+	
+	// if below 16
+	if (offset/BLOCK_SIZE < 16) {
+		if (!(in->direct_ptr[offset/BLOCK_SIZE])) {
+			in->direct_ptr[offset/BLOCK_SIZE] = get_avail_blkno();
+		}
+		bio_read(in->direct_ptr[offset/BLOCK_SIZE], tmp);
+		memcpy(tmp, buffer, BLOCK_SIZE);
+		bio_write(in->direct_ptr[offset/BLOCK_SIZE], tmp);
+		in->size += size;
+		writei(in->ino, in);
+		return size;
+	}
+	// else
+	int *blks = malloc(BLOCK_SIZE);
+	int start_blk = ((offset/BLOCK_SIZE-16) % MAX_INUM)/MAX_INUM;
+	if (!(in->indirect_ptr[start_blk])) {
+		in->indirect_ptr[start_blk] = get_avail_blkno();
+		memset(blks, 0, BLOCK_SIZE);
+	} else {
+		bio_read(in->indirect_ptr[start_blk], blks);
+	}
 
+	if (!(blks[((offset/BLOCK_SIZE-16) % MAX_INUM)])) {
+		blks[((offset/BLOCK_SIZE-16) % MAX_INUM)] = get_avail_blkno();
+		bio_write(in->indirect_ptr[start_blk], blks);
+	}
+	
 	// Step 4: Update the inode info and write it to disk
-
+	bio_read(blks[((offset/BLOCK_SIZE-16) % MAX_INUM)], tmp);
+	memcpy(tmp, buffer, BLOCK_SIZE);
+	bio_write(blks[((offset/BLOCK_SIZE-16) % MAX_INUM)], tmp);
+	in->size += size;
+	writei(in->ino, in);
+	
 	// Note: this function should return the amount of bytes you write to disk
 	return size;
 }
