@@ -397,7 +397,7 @@ static int tfs_getattr(const char *path, struct stat *stbuf) {
 	time(&stbuf->st_mtime); //time
 	stbuf->st_uid = getuid(); //user ID of owner
 	stbuf->st_gid = getgid(); //group ID of owner
-	stbuf->ino = node->ino; //inode number
+	stbuf->st_ino = node->ino; //inode number
 	stbuf->st_size = node->size; //file size
 
 	return 0;
@@ -491,9 +491,21 @@ char *dirname(const char *path)
 static int tfs_mkdir(const char *path, mode_t mode) {
 
 	// Step 1: Use dirname() and basename() to separate parent directory path and target directory name
-
+	char *base = basename(strdup(path));
+	char *dirpath = dirname(strdup(path));
 	// Step 2: Call get_node_by_path() to get inode of parent directory
-
+	struct inode *node = malloc(sizeof(struct inode));
+	if(node == NULL) 
+	{
+		perror("error allocating inode");
+		return -2;
+	}
+	int ret = get_node_by_path(dirpath, 0, node);
+	if(ret < 0)
+	{
+		printf("error returned in get_node_by_path\n");
+		return -2;
+	}
 	// Step 3: Call get_avail_ino() to get an available inode number
 
 	// Step 4: Call dir_add() to add directory entry of target directory to parent directory
