@@ -688,16 +688,71 @@ static int tfs_write(const char *path, const char *buffer, size_t size, off_t of
 static int tfs_unlink(const char *path) {
 
 	// Step 1: Use dirname() and basename() to separate parent directory path and target file name
+	char *dn = dirname(strdup(path));
+	char *bn = basename(strdup(path));
 
-	// Step 2: Call get_node_by_path() to get inode of target file
+	// Step 2: Call get_node_by_path() to get inode of target directory
+	struct inode *in = malloc(sizeof(struct inode));
+	if ((get_node_by_path(path, 0, in) != 0)||(in->type != 0)) {
+		free(in);
+		return -1;
+	}
 
-	// Step 3: Clear data block bitmap of target file
+	// Step 3: Clear data block bitmap of target directory
+	unsigned char *bm = malloc(sizeof(unsigned char)*BLOCK_SIZE);
+	char *data = malloc(sizeof(char)*BLOCK_SIZE);
+	int direc, in_direc;
+	int *bsec = malloc(BLOCK_SIZE / sizeof(int));
+	bio_read(2, bm);
+	for (direc = 0; direc < 16; direc++) {
+		if(in->direct_ptr[direc] == -1){
+			continue;
+		}
+		bio_read(in->direct_ptr[direc], data);
+		memset(data, 0, BLOCK_SIZE);
+		bio_write(in->direct_ptr[direc], data);
+		unset_bitmap((bitmap_t)bm, in->direct_ptr[direc]);
+		in->direct_ptr[direc] = -1;
+	}
+	for(in_direc = 0; in_direc < 8; in_direc++) {
+		if(in->indirect_ptr[in_direc] == -1){
+			continue;
+		}
+		bio_read(in->indirect_ptr[in_direc], bsec);
+		for(direc = 0; direc < BLOCK_SIZE / sizeof(int); direc++) {
+			if(bsec[direc] == 0){
+				continue;
+			}
+			bio_read(bsec[direc], data);
+			memset(data, 0, BLOCK_SIZE);
+			bio_write(bsec[direc], data);
+			unset_bitmap((bitmap_t)bm, bsec[direc]);
+			bsec[direc] = 0;
+		}
+		bio_write(in->indirect_ptr[in_direc], bsec);
+		unset_bitmap((bitmap_t)bm, in->indirect_ptr[in_direc]);
+		in->indirect_ptr[in_direc] = -1;
+	}
+	bio_write(2, bm);
 
 	// Step 4: Clear inode bitmap and its data block
+	in->valid = 0;
+	in->type = 0;
+	in->link = 0;
+	writei(in->ino, in);	
+	bio_read(1, bm);
+	unset_bitmap((bitmap_t)bm, in->ino);
+	bio_write(1, bm);
 
 	// Step 5: Call get_node_by_path() to get inode of parent directory
-
-	// Step 6: Call dir_remove() to remove directory entry of target file in its parent directory
+	if ((get_node_by_path(dn, 0, in) != 0)||(in->type != 1)) {
+		free(in);
+		return -1;
+	}
+	
+	// Step 6: Call dir_remove() to remove directory entry of target directory in its parent directory
+	dir_remove(*in, bn, strlen(bn));
+	free(in);
 
 	return 0;
 }
