@@ -447,7 +447,7 @@ static int tfs_readdir(const char *path, void *buffer, fuse_fill_dir_t filler, o
 	} while(blocknum < 16);
 	return 0;
 }
-char *basename(const char *path)
+/*char *basename(const char *path)
 {
 	char *base = malloc(MAX_DIRNAME);
 	char *reset = "\0";
@@ -486,7 +486,7 @@ char *dirname(const char *path)
 		strcat(dirpath, path[i], 1);
 		i++;
 	}
-}
+}*/
 static int tfs_mkdir(const char *path, mode_t mode) {
 
 	// Step 1: Use dirname() and basename() to separate parent directory path and target directory name
@@ -508,16 +508,55 @@ static int tfs_mkdir(const char *path, mode_t mode) {
 static int tfs_rmdir(const char *path) {
 
 	// Step 1: Use dirname() and basename() to separate parent directory path and target directory name
+	char *dp = dirname(strdup(path));
+	char *bn = basename(strdup(path));
 
 	// Step 2: Call get_node_by_path() to get inode of target directory
+	struct inode *in = malloc(sizeof(struct inode));
+	if ((get_node_by_path(path, 0, in) != 0)||(in->type != 1)) {
+		free(in);
+		return -1;
+	}
+	if (strcmp(path, "/") == 0) {
+		return -1;	
+	}
+
+	unsigned char *bm = malloc(sizeof(unsigned char)*BLOCK_SIZE);
+	char *data = malloc(sizeof(char)*BLOCK_SIZE);
+	bio_read(2, bm);
 
 	// Step 3: Clear data block bitmap of target directory
+	int direc;
+	for (direc = 0; direc < 16; direc++) {
+		if(in->direct_ptr[direc] == -1){
+			continue;
+		}
+		bio_read(in->direct_ptr[direc], data);
+		memset(data, 0, BLOCK_SIZE);
+		bio_write(in->direct_ptr[direc], data);
+		unset_bitmap((bitmap_t)bm, in->direct_ptr[direc]);		
+		in->direct_ptr[direc] = -1;		
+	}
+	bio_write(2, bm);
 
 	// Step 4: Clear inode bitmap and its data block
+	in->valid = 0;
+	in->type = 0;
+	in->link = 0;
+	writei(in->ino, in);	
+	bio_read(1, bm);
+	unset_bitmap((bitmap_t)bm, in->ino);
+	bio_write(1, bm);
 
 	// Step 5: Call get_node_by_path() to get inode of parent directory
+	if ((get_node_by_path(dp, 0, in) != 0)||(in->type != 1)) {
+		free(in);
+		return -1;
+	}
 
 	// Step 6: Call dir_remove() to remove directory entry of target directory in its parent directory
+	dir_remove(*in, bn, strlen(bn));
+	free(in);
 
 	return 0;
 }
@@ -531,16 +570,49 @@ static int tfs_releasedir(const char *path, struct fuse_file_info *fi) {
 static int tfs_create(const char *path, mode_t mode, struct fuse_file_info *fi) {
 
 	// Step 1: Use dirname() and basename() to separate parent directory path and target file name
+	char *dp = dirname(strdup(path));
+	char *bn = basename(strdup(path));
+	struct inode *in = malloc(sizeof(struct inode));
 
 	// Step 2: Call get_node_by_path() to get inode of parent directory
+	if ((get_node_by_path(dp, 0, in) != 0)||(in->type != 1)) {
+		free(in);
+		return -1;
+	}
 
 	// Step 3: Call get_avail_ino() to get an available inode number
+	int get = get_avail_ino();
 
 	// Step 4: Call dir_add() to add directory entry of target file to parent directory
+	if(dir_add(*in, (uint16_t)get, bn, strlen(bn)) != 0) {		
+		unsigned char *bm = malloc(sizeof(unsigned char)*BLOCK_SIZE);
+		bio_read(1, bm);
+		unset_bitmap((bitmap_t)bm, get);
+		bio_write(1, bm);
+		return -1;
+	}
 
 	// Step 5: Update inode for target file
+	struct inode *new_in = malloc(sizeof(struct inode));
+	readi(get, new_in);
+	new_in->ino = (uint16_t)get;
+	new_in->valid = 1;
+	new_in->size = 0;
+	new_in->type = 0;
+	new_in->link = 1;
+	int direc;
+	for(direc = 0; direc < 16; direc++) {
+		new_in->direct_ptr[direc] = -1;
+		if(direc < 8){
+			new_in->indirect_ptr[direc] = -1;
+		}
+	}
 
 	// Step 6: Call writei() to write inode to disk
+	writei(get, new_in);
+	free(in);
+	free(new_in);
+
 
 	return 0;
 }
